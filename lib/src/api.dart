@@ -40,13 +40,13 @@ abstract interface class ViewModelLifecycle<Param> {
   /// Initializes the ViewModel and its members.
   ///
   /// Should correspond to [State.initState].
-  void init(ViewModelOwner owner, Param param);
+  void init(ViewModelOwner owner);
 
   /// Completely updates the ViewModel and its members when the parameters or
   /// Riverpod provider state changes.
   ///
   /// Should correspond to [State.didUpdateWidget] and [State.build].
-  void update(ViewModelOwner owner, Param param);
+  void update(ViewModelOwner owner);
 
   /// Deinitializes the ViewModel.
   ///
