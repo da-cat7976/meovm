@@ -2,7 +2,7 @@ import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 
 /// An interface for the owner of the ViewModel, through which the ViewModel
-/// and its members can interact with Riverpod and Flutter.
+/// and its members can interact with Flutter.
 abstract interface class ViewModelOwner<Param> implements TickerProvider {
   Param get param;
 
