@@ -96,19 +96,27 @@ abstract class ViewModel<Param>
 
     bool hasDependencies = false;
     void setter(ViewModelMember source, ViewModelMember target) {
-      final dependents = _dependencies[source];
-      assert(
-        dependents != null,
-        'Master member is not owned by this ViewModel. '
-        'Make sure it is added to the members list',
-      );
+      Set<ViewModelMemberBase>? dependents = _dependencies[source];
+      if (dependents == null) {
+        // ? Since external members is passed with param (there's no other way
+        // ? to do it), changes of param should be handled somehow
+        // TODO: handle replacement of external member
+        assert(
+          true,
+          'Master member is not owned by this ViewModel. '
+          'Make sure it is added to the members list',
+        );
+
+        dependents = {};
+      }
+
       assert(
         _dependencies.keys.contains(target),
         'Slave member is not owned by this ViewModel. '
         'Make sure it is added to the members list',
       );
 
-      dependents!.add(target);
+      dependents.add(target);
       hasDependencies = true;
     }
 
