@@ -8,16 +8,20 @@ import 'package:meta/meta.dart';
 typedef ViewModelDependencySetter =
     void Function(ViewModelMember source, ViewModelMember target);
 
+typedef _DependencyPair = ({ViewModelMember source, ViewModelMember target});
+
+typedef _DisposeListener = void Function(ViewModelMember disposed);
+
 /// Base class for ViewModel, providing lifecycle implementation,
 /// member management, and their dependencies.
 ///
 /// For information on how to integrate ViewModel into the widget tree, see
 /// [ViewModelDispatcher].
-abstract class ViewModel<Param>
+abstract class ViewModel<Param extends ViewModelParameter>
     implements ViewModelLifecycle<Param>, ViewModelMemberFactoryAccess {
   @mustBeOverridden
   @visibleForOverriding
-  List<ViewModelMemberBase> get members => [];
+  List<ViewModelMember> get members;
 
   /// Current state of the ViewModel.
   ///
@@ -54,11 +58,13 @@ abstract class ViewModel<Param>
     return _param as Param;
   }
 
-  final Map<ViewModelMemberBase, Set<ViewModelMemberBase>> _dependencies = {};
+  final Map<ViewModelMember, Set<ViewModelMember>> _dependencies = {};
 
-  late List<ViewModelMemberBase> _members;
+  final Map<ViewModelMember, VoidCallback> _dependencyListeners = {};
 
-  ViewModelOwner? _owner;
+  late List<ViewModelMember> _members;
+
+  ViewModelOwner<Param>? _owner;
 
   Param? _param;
 
@@ -66,7 +72,7 @@ abstract class ViewModel<Param>
 
   @override
   @mustCallSuper
-  void init(ViewModelOwner owner) {
+  void init(ViewModelOwner<Param> owner) {
     if (_state != ViewModelState.created) {
       throw StateError(
         'ViewModel can only be initialized once from the created state. '
@@ -78,49 +84,56 @@ abstract class ViewModel<Param>
     _param = owner.param;
     _members = members;
 
-    _calculateDependencies();
-
     for (final member in _members) {
       member.init(owner);
     }
 
-    _integrateDependencies();
+    updateDependencies();
 
     _state = ViewModelState.active;
   }
 
-  void _calculateDependencies() {
+  @override
+  void updateDependencies() {
+    final Set<_DependencyPair> integratedPairs = {};
+
+    final Set<ViewModelMember> invalidatedSources = Set.of(_dependencies.keys);
     for (final member in _members) {
-      _dependencies[member] = {};
+      _dependencies[member] ??= {};
     }
 
     bool hasDependencies = false;
     void setter(ViewModelMember source, ViewModelMember target) {
-      Set<ViewModelMemberBase>? dependents = _dependencies[source];
-      if (dependents == null) {
-        // ? Since external members is passed with param (there's no other way
-        // ? to do it), changes of param should be handled somehow
-        // TODO: handle replacement of external member
-        assert(
-          true,
-          'Master member is not owned by this ViewModel. '
-          'Make sure it is added to the members list',
-        );
-
-        dependents = {};
+      Set<ViewModelMemberBase>? dependents = _dependencies[source] ??= {};
+      if (dependents.contains(target)) {
+        integratedPairs.add((source: source, target: target));
+        return;
       }
 
       assert(
-        _dependencies.keys.contains(target),
-        'Slave member is not owned by this ViewModel. '
-        'Make sure it is added to the members list',
+        _dependencies.containsKey(target),
+        'Target member is not owned by this ViewModel.\n'
+        'If you are setting dependencies manually, make sure it is added to the '
+        'members list.\n'
+        'If you are using code generation, make sure it is annotated with '
+        '@VmMember and re-run the build_runner.',
       );
 
       dependents.add(target);
+      invalidatedSources.remove(source);
+
       hasDependencies = true;
     }
 
     setDependencies(setter);
+
+    for (final invalidated in invalidatedSources) {
+      final listener = _dependencyListeners[invalidated];
+      if (listener == null) continue;
+
+      invalidated._lifecycleAwareRemoveListener(listener);
+      _dependencyListeners.remove(invalidated);
+    }
 
     if (hasDependencies) {
       try {
@@ -132,7 +145,7 @@ abstract class ViewModel<Param>
         assert(
           false,
           'ViewModel can not have circular dependencies between members. '
-          'Dependency feature is disabled.\n\n'
+          'Dependency feature will be disabled in production mode.\n\n'
           'Reason: $error\n\n'
           'Stacktrace: $stacktrace',
         );
@@ -140,25 +153,33 @@ abstract class ViewModel<Param>
         _dependencies.clear();
       }
     }
-  }
 
-  void _integrateDependencies() {
-    for (final MapEntry(key: source, value: targets) in _dependencies.entries) {
-      if (targets.isEmpty) {
-        source.addListener(source.notifyUpdateCompleted);
-        continue;
-      }
+    for (final source in _dependencies.keys) {
+      if (_dependencyListeners.containsKey(source)) continue;
+      // ? Dispose listeners is designed to ensure there are no memory leaks
+      // ? with external dependencies. However, internal members is also
+      // ? listened for disposal, but this should have no effect since
+      // ? dispose listener is removed before calling .dispose() on internal
+      // ? members.
+      source._addDisposeListener(_memberDisposeListener);
 
-      // ignore: cascade_invocations
-      source.addListener(() {
+      // ? In some cases this mechanism can call targets twice due to
+      // ? complexity of dependencies. It's not a big deal since member's
+      // ? architecture prevents unnecessary UI updates, but it's still
+      // ? a problem that sometimes should be fixed.
+      void listener() {
         if (_state != ViewModelState.active) return;
 
+        final targets = _dependencies[source]!;
         for (final target in targets) {
           target.update();
         }
 
         source.notifyUpdateCompleted();
-      });
+      }
+
+      source.addListener(listener);
+      _dependencyListeners[source] = listener;
     }
   }
 
@@ -182,7 +203,7 @@ abstract class ViewModel<Param>
 
   @override
   @mustCallSuper
-  void update(ViewModelOwner owner) {
+  void update() {
     if (_state != ViewModelState.active) {
       throw StateError(
         'ViewModel can be updated only from ready state. '
@@ -215,12 +236,25 @@ abstract class ViewModel<Param>
     }
     _state = ViewModelState.disposed;
 
+    for (final member in _dependencyListeners.keys) {
+      member.removeListener(_dependencyListeners[member]!);
+      member._removeDisposeListener(_memberDisposeListener);
+    }
+
     for (final member in _members) {
       member.dispose();
     }
 
     _owner = null;
     _param = null;
+    _dependencyListeners.clear();
+    _dependencies.clear();
+    _members.clear();
+  }
+
+  void _memberDisposeListener(ViewModelMember disposed) {
+    _dependencyListeners.remove(disposed);
+    _dependencies.remove(disposed);
   }
 
   @override
@@ -268,6 +302,8 @@ abstract class ViewModelMember implements ViewModelMemberBase {
 
   ViewModelOwner? _owner;
 
+  final List<_DisposeListener> _disposeListeners = [];
+
   @override
   @mustCallSuper
   @visibleForOverriding
@@ -288,6 +324,24 @@ abstract class ViewModelMember implements ViewModelMemberBase {
     assert(_owner != null, 'Member is not initialized');
 
     _owner = null;
+    for (final listener in _disposeListeners) {
+      listener(this);
+    }
+
+    _disposeListeners.clear();
+  }
+
+  void _addDisposeListener(_DisposeListener listener) {
+    _disposeListeners.add(listener);
+  }
+
+  void _removeDisposeListener(_DisposeListener listener) {
+    _disposeListeners.remove(listener);
+  }
+
+  void _lifecycleAwareRemoveListener(VoidCallback listener) {
+    if (_owner == null) return;
+    removeListener(listener);
   }
 
   @override
@@ -296,7 +350,10 @@ abstract class ViewModelMember implements ViewModelMemberBase {
       StringProperty(debugName, '<unknown>', quoted: false);
 }
 
-abstract class ViewModelDelegate<VM extends ViewModel<Param>, Param>
+abstract class ViewModelDelegate<
+  VM extends ViewModel<Param>,
+  Param extends ViewModelParameter
+>
     implements ViewModelMemberFactoryAccess {
   const ViewModelDelegate({required this.owner});
 
