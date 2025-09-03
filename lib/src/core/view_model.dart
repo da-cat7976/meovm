@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:graphs/graphs.dart';
-import 'package:meovm/src/api.dart';
-import 'package:meovm/src/member_factory.dart';
+import 'package:meovm/src/core/api.dart';
+import 'package:meovm/src/core/member_factory.dart';
 import 'package:meta/meta.dart';
 
 /// Function for defining dependencies between ViewModel members.
