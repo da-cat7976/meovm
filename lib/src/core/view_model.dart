@@ -205,7 +205,7 @@ abstract class ViewModel<Param extends ViewModelParameter>
     }
 
     _state = ViewModelState.updating;
-    _param = param;
+    _param = _owner!.param;
 
     for (final member in _members) {
       member.update();
