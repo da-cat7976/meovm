@@ -8,8 +8,6 @@ import 'package:meta/meta.dart';
 typedef ViewModelDependencySetter =
     void Function(ViewModelMember source, ViewModelMember target);
 
-typedef _DependencyPair = ({ViewModelMember source, ViewModelMember target});
-
 typedef _DisposeListener = void Function(ViewModelMember disposed);
 
 /// Base class for ViewModel, providing lifecycle implementation,
@@ -95,8 +93,6 @@ abstract class ViewModel<Param extends ViewModelParameter>
 
   @override
   void updateDependencies() {
-    final Set<_DependencyPair> integratedPairs = {};
-
     final Set<ViewModelMember> invalidatedSources = Set.of(_dependencies.keys);
     for (final member in _members) {
       _dependencies[member] ??= {};
@@ -105,10 +101,7 @@ abstract class ViewModel<Param extends ViewModelParameter>
     bool hasDependencies = false;
     void setter(ViewModelMember source, ViewModelMember target) {
       Set<ViewModelMemberBase>? dependents = _dependencies[source] ??= {};
-      if (dependents.contains(target)) {
-        integratedPairs.add((source: source, target: target));
-        return;
-      }
+      if (dependents.contains(target)) return;
 
       assert(
         _dependencies.containsKey(target),
