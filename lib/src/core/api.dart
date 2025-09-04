@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 
 /// An interface for the owner of the ViewModel, through which the ViewModel
 /// and its members can interact with Flutter.
-abstract interface class ViewModelOwner<Param extends ViewModelParameter>
+abstract interface class ViewModelOwner<Param extends ViewModelParameter?>
     implements TickerProvider {
   Param get param;
 
@@ -34,7 +34,7 @@ enum ViewModelState {
 
 /// An interface for the lifecycle of the ViewModel, enabling its integration
 /// with the State owner.
-abstract interface class ViewModelLifecycle<Param extends ViewModelParameter> {
+abstract interface class ViewModelLifecycle<Param extends ViewModelParameter?> {
   /// The current state of the ViewModel.
   ViewModelState get state;
 

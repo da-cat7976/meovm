@@ -4,12 +4,12 @@ import 'package:meovm/src/core/api.dart';
 
 typedef ViewModelFactory<
   VM extends ViewModelLifecycle<Param>,
-  Param extends ViewModelParameter
+  Param extends ViewModelParameter?
 > = VM Function();
 
 mixin ViewModelDispatcherBase<
   VM extends ViewModelLifecycle<Param>,
-  Param extends ViewModelParameter
+  Param extends ViewModelParameter?
 >
     on StatefulWidget {
   ViewModelFactory<VM, Param> get factory;
@@ -17,16 +17,14 @@ mixin ViewModelDispatcherBase<
   Param get param;
 
   Widget get child;
-
-  @override
-  ViewModelDispatcherStateBase createState();
 }
 
 mixin ViewModelDispatcherStateBase<
+  W extends ViewModelDispatcherBase<VM, Param>,
   VM extends ViewModelLifecycle<Param>,
   Param extends ViewModelParameter
 >
-    on State<ViewModelDispatcherBase<VM, Param>>
+    on State<W>
     implements ViewModelOwner<Param> {
   VM get viewModel => _viewModel;
 
@@ -49,7 +47,7 @@ mixin ViewModelDispatcherStateBase<
 
   @override
   @mustCallSuper
-  void didUpdateWidget(covariant ViewModelDispatcherBase<VM, Param> oldWidget) {
+  void didUpdateWidget(covariant W oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     final param = _param = widget.param;
