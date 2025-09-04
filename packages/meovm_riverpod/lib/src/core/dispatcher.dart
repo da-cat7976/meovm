@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meovm/meovm.dart';
+import 'package:meovm_riverpod/src/core/feature.dart';
 
 class RiverpodVmDispatcher<
   VM extends ViewModelLifecycle<Param>,
@@ -43,8 +44,7 @@ class RiverpodVmDispatcherState<
         >,
         TickerProviderStateMixin {
   @override
-  F getFeature<F extends ViewModelOwnerFeature>() {
-    // TODO: implement getFeature
-    throw UnimplementedError();
-  }
+  List<ViewModelOwnerFeature> get features => [
+    RiverpodViewModelOwnerFeature(ref: () => ref),
+  ];
 }

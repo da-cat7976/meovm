@@ -10,10 +10,15 @@ abstract interface class ViewModelOwner<Param extends ViewModelParameter?>
   F getFeature<F extends ViewModelOwnerFeature>();
 }
 
+// ? Maybe other lifecycle methods of State should be accessible as well?
 /// Base interface for external ViewModel features such as state manager
 /// integration.
 abstract interface class ViewModelOwnerFeature {
-  // Intentionally left blank
+  void init();
+
+  void didUpdateWidget();
+
+  void dispose();
 }
 
 /// Possible states of the ViewModel.

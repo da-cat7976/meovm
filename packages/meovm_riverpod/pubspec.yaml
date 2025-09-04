@@ -15,6 +15,7 @@ dependencies:
   # TODO: Remove path dependency after pub release
   meovm:
     path: ../../
+  meta: ^1.17.0
 
 dev_dependencies:
   flutter_test:

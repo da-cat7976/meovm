@@ -35,10 +35,30 @@ mixin ViewModelDispatcherStateBase<
 
   late Param _param;
 
+  @visibleForOverriding
+  List<ViewModelOwnerFeature> get features => [];
+
+  late List<ViewModelOwnerFeature> _features;
+
+  @override
+  @nonVirtual
+  F getFeature<F extends ViewModelOwnerFeature>() {
+    for (final feature in _features) {
+      if (feature is F) return feature;
+    }
+
+    throw ArgumentError('Feature $F not found');
+  }
+
   @override
   @mustCallSuper
   void initState() {
     super.initState();
+
+    _features = features;
+    for(final feature in _features) {
+      feature.init();
+    }
 
     _viewModel = widget.factory();
     _param = widget.param;
@@ -49,6 +69,10 @@ mixin ViewModelDispatcherStateBase<
   @mustCallSuper
   void didUpdateWidget(covariant W oldWidget) {
     super.didUpdateWidget(oldWidget);
+
+    for(final feature in _features) {
+      feature.didUpdateWidget();
+    }
 
     final param = _param = widget.param;
     if (param.shouldUpdateDependencies(oldWidget.param)) {
@@ -63,6 +87,10 @@ mixin ViewModelDispatcherStateBase<
   @override
   @mustCallSuper
   void dispose() {
+    for(final feature in _features) {
+      feature.dispose();
+    }
+
     _viewModel.dispose();
     super.dispose();
   }

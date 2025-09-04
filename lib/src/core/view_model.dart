@@ -15,7 +15,7 @@ typedef _DisposeListener = void Function(ViewModelMember disposed);
 ///
 /// For information on how to integrate ViewModel into the widget tree, see
 /// [ViewModelDispatcher].
-abstract class ViewModel<Param extends ViewModelParameter>
+abstract class ViewModel<Param extends ViewModelParameter?>
     implements ViewModelLifecycle<Param>, ViewModelMemberFactoryAccess {
   @mustBeOverridden
   @visibleForOverriding
