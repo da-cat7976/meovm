@@ -10,4 +10,6 @@ final class VmMember {
 @Target({TargetKind.classType})
 final class VmMemberDefinition {
   const VmMemberDefinition();
+
+  static const name = 'VmMemberDefinition';
 }

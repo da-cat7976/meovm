@@ -1,11 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:meovm/src/core/api.dart';
 import 'package:meovm/src/core/view_model.dart';
+import 'package:meovm/src/core/annotations.dart';
 
 typedef GroupMemberBuilder<K, M extends ViewModelMember> = M Function(
   K key,
 );
 
+@VmMemberDefinition()
 class MemberGroup<K, M extends ViewModelMember> extends ViewModelMember
     with ChangeNotifier {
   MemberGroup({

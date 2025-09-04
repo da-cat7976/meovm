@@ -3,6 +3,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:meovm/src/core/view_model.dart';
+import 'package:meovm/src/core/annotations.dart';
 import 'package:meovm/src/members/value.dart';
 
 /// Member that allows controlling navigation from the ViewModel.
@@ -44,6 +45,7 @@ import 'package:meovm/src/members/value.dart';
 ///   }
 /// }
 /// ```
+@VmMemberDefinition()
 class NavigationMember<T> extends ValueMember<T> {
   NavigationMember({
     super.initial,
@@ -148,6 +150,7 @@ class NavigationMember<T> extends ValueMember<T> {
 ///  }
 /// }
 /// ```
+@VmMemberDefinition()
 class ModalFlowMember<Result> extends ViewModelMember with ChangeNotifier {
   ModalFlowMember({
     super.debugName,
