@@ -10,6 +10,7 @@ dependencies:
   collection: ^1.19.1
   flutter:
     sdk: flutter
+  flutter_hooks: ^0.21.3+1
   graphs: ^2.3.2
   meta: ^1.16.0
 
