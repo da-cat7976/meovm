@@ -3,7 +3,6 @@ import 'dart:math';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:meovm/src/members/common.dart';
-import 'package:meovm/src/core/annotations.dart';
 
 typedef ValueMemberResolver<T> = T Function(T? data);
 
@@ -37,7 +36,6 @@ typedef ValueMemberResolver<T> = T Function(T? data);
 /// ```
 ///
 /// Note: for list handling, it is recommended to use [ListMember].
-@VmMemberDefinition()
 class ValueMember<T> extends BuildableViewModelMember with ChangeNotifier {
   /// Creates a new member that stores a value of type [T].
   ///
@@ -154,7 +152,6 @@ class ValueMember<T> extends BuildableViewModelMember with ChangeNotifier {
 ///     );
 ///   }
 /// }
-@VmMemberDefinition()
 class ListMember<T> extends BuildableViewModelMember with ChangeNotifier {
   /// Creates a new member that holds a list of values of type [T].
   ///
@@ -350,7 +347,6 @@ class ListMember<T> extends BuildableViewModelMember with ChangeNotifier {
       );
 }
 
-@VmMemberDefinition()
 class SetMember<T> extends BuildableViewModelMember with ChangeNotifier {
   /// Creates a new member that stores a set of values of type [T].
   ///

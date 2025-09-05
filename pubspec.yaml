@@ -13,6 +13,8 @@ dependencies:
   flutter_hooks: ^0.21.3+1
   graphs: ^2.3.2
   meta: ^1.16.0
+  meovm_api:
+    path: packages/meovm_api
 
 dev_dependencies:
   flutter_test:

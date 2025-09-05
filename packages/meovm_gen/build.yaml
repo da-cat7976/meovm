@@ -1,0 +1,15 @@
+targets:
+  $default:
+    builders:
+      meovm_gen|vm_mixin_builder:
+        enabled: true
+
+builders:
+  vm_mixin_builder:
+    target: ":vm_mixin_builder"
+    import: "package:meovm_gen/meovm_gen.dart"
+    builder_factories: ["vmMixinBuilder"]
+    build_extensions: {".dart": [".vm_mixin_builder.g.part"]}
+    auto_apply: dependents
+    build_to: cache
+    applies_builders: ["source_gen|combining_builder"]

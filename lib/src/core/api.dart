@@ -1,5 +1,6 @@
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
+import 'package:meovm_api/meovm_api.dart';
 
 /// An interface for the owner of the ViewModel, through which the ViewModel
 /// and its members can interact with Flutter.
@@ -39,7 +40,8 @@ enum ViewModelState {
 
 /// An interface for the lifecycle of the ViewModel, enabling its integration
 /// with the State owner.
-abstract interface class ViewModelLifecycle<Param extends ViewModelParameter?> {
+abstract interface class ViewModelLifecycle<Param extends ViewModelParameter?>
+    implements MeovmAutoVm {
   /// The current state of the ViewModel.
   ViewModelState get state;
 
@@ -71,7 +73,8 @@ abstract interface class ViewModelLifecycle<Param extends ViewModelParameter?> {
 
 /// An interface for the lifecycle of a ViewModel member, enabling its
 /// integration with the ViewModel and the State owner.
-abstract interface class ViewModelMemberBase implements Listenable {
+abstract interface class ViewModelMemberBase
+    implements Listenable, MeovmAutoVmMember {
   /// Initializes the ViewModel member, binding it to the provided [owner].
   void init(ViewModelOwner owner);
 
@@ -101,7 +104,7 @@ abstract interface class ViewModelMemberBase implements Listenable {
 /// The lifecycle of external members, as well as their replacement with others,
 /// is handled by the configured ViewModel.
 @immutable
-abstract base mixin class ViewModelParameter {
+abstract base mixin class ViewModelParameter implements MeovmAutoVmParameter {
   const ViewModelParameter();
 
   /// Compares this with [oldParam] and returns `true` if this has changes

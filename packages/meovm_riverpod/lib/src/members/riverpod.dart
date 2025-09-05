@@ -87,7 +87,6 @@ abstract class RiverpodMember<T> extends UpdateNotifierMember<T> {
 /// [ListMember]. Besides the obvious reduction of data access, this also
 /// allows optimizing UI updates, as they only occur if the provided provider
 /// object's `intValue` changes.
-@VmMemberDefinition()
 class RiverpodDataMember<T> extends RiverpodMember<T> {
   RiverpodDataMember(this._resolver, {super.debugName, super.frozen});
 
@@ -173,7 +172,6 @@ class RiverpodDataMember<T> extends RiverpodMember<T> {
 ///
 /// It is important to consider the peculiarities of [RiverpodDataMember]
 /// when working with [data].
-@VmMemberDefinition()
 class RiverpodActionGroup<Group, State> extends RiverpodMember<State> {
   RiverpodActionGroup(this._resolver, {super.debugName, super.frozen});
 

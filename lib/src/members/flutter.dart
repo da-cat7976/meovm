@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:meovm/src/core/api.dart';
 import 'package:meovm/src/members/common.dart';
-import 'package:meovm/src/core/annotations.dart';
 
 typedef MemberInitializer<T> = T Function();
 
@@ -13,7 +12,6 @@ typedef MemberUpdaterWithResult<T extends Listenable, R> = R Function(T ctr);
 /// A member that allows the ViewModel to work with a [TextEditingController].
 ///
 /// Changes to the [TextEditingController] are tracked by this member.
-@VmMemberDefinition()
 class EditableTextMember extends BuildableViewModelMember {
   EditableTextMember({
     this.initText,
@@ -109,7 +107,6 @@ class EditableTextMember extends BuildableViewModelMember {
 /// A member that allows the ViewModel to work with an [AnimationController].
 ///
 /// Changes to the [AnimationController] are tracked by this member.
-@VmMemberDefinition()
 class AnimationMember extends BuildableViewModelMember {
   AnimationMember({
     required this.initController,
@@ -213,7 +210,6 @@ typedef FocusNodeUpdater = void Function(FocusNode node);
 /// A member that allows the ViewModel to work with a [FocusNode].
 ///
 /// Changes to the [FocusNode] are tracked by this member.
-@VmMemberDefinition()
 class FocusMember extends BuildableViewModelMember {
   FocusMember({
     this.onUpdate,
@@ -282,7 +278,6 @@ class FocusMember extends BuildableViewModelMember {
 /// A member that allows the ViewModel to work with a [TabController].
 ///
 /// Changes to the [TabController] are tracked by this member.
-@VmMemberDefinition()
 class TabMember extends BuildableViewModelMember {
   TabMember({
     required this.initController,
@@ -394,7 +389,6 @@ class TabMember extends BuildableViewModelMember {
 /// [ChangeNotifier].
 ///
 /// Calls to [ChangeNotifier.notifyListeners] are tracked by this member.
-@VmMemberDefinition()
 class CustomChangeNotifierMember<N extends ChangeNotifier>
     extends BuildableViewModelMember {
   CustomChangeNotifierMember(
