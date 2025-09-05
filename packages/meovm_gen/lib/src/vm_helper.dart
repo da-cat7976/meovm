@@ -9,6 +9,7 @@ import 'package:dart_style/dart_style.dart';
 import 'package:meovm_api/meovm_api.dart';
 import 'package:source_gen/source_gen.dart';
 
+// TODO: inheritance support
 class VmMixinGeneratorHelper {
   final DartFormatter _formatter = DartFormatter(
     languageVersion: DartFormatter.latestLanguageVersion,
