@@ -9,7 +9,6 @@ import 'package:dart_style/dart_style.dart';
 import 'package:meovm_api/meovm_api.dart';
 import 'package:source_gen/source_gen.dart';
 
-// TODO: inheritance support
 class VmMixinGeneratorHelper {
   final DartFormatter _formatter = DartFormatter(
     languageVersion: DartFormatter.latestLanguageVersion,
@@ -32,7 +31,12 @@ class VmMixinGeneratorHelper {
     if (library is! ResolvedLibraryResult) return '';
 
     final members = _getMembers(element).toList();
-    final dependencies = _getDependencies(library, members).toList();
+    final inheritedMembers = _getInheritedMembers(element).toList();
+    final dependencies = _getDependencies(
+      library,
+      members,
+      inheritedMembers,
+    ).toList();
 
     final definitions = _buildDefinitions(members);
     final memberList = _buildMembersList(members);
@@ -43,7 +47,7 @@ class VmMixinGeneratorHelper {
         ..name = '_\$${element.name}'
         ..on = refer('ViewModel')
         ..methods.addAll(
-          [...definitions, memberList, setDependencies], // fmt
+          [...definitions, ?memberList, ?setDependencies], // fmt
         ),
     );
 
@@ -58,10 +62,21 @@ class VmMixinGeneratorHelper {
     }
   }
 
+  Iterable<FieldElement> _getInheritedMembers(ClassElement element) sync* {
+    for (final type in element.allSupertypes) {
+      for (final field in type.element.fields) {
+        if (_memberChecker.isAssignableFromType(field.type)) yield field;
+      }
+    }
+  }
+
   Iterable<_DependencyPair> _getDependencies(
     ResolvedLibraryResult library,
     List<FieldElement> members,
+    List<FieldElement> inheritedMembers,
   ) sync* {
+    final allMembers = [...members, ...inheritedMembers];
+
     for (final member in members) {
       final declaration = library.getElementDeclaration(member);
       final node = declaration?.node;
@@ -73,7 +88,7 @@ class VmMixinGeneratorHelper {
       final collector = _MemberDependenciesCollector(
         library: library,
         current: member,
-        members: members,
+        members: allMembers,
       );
       initializer.visitChildren(collector);
 
@@ -94,7 +109,8 @@ class VmMixinGeneratorHelper {
     }
   }
 
-  Method _buildMembersList(Iterable<FieldElement> members) {
+  Method? _buildMembersList(Iterable<FieldElement> members) {
+    if (members.isEmpty) return null;
     final names = members.map((e) => e.name);
 
     return Method(
@@ -104,12 +120,19 @@ class VmMixinGeneratorHelper {
         ..type = MethodType.getter
         ..annotations.add(refer('override'))
         ..body = Block(
-          (b) => b.addExpression(literalList(names.map(refer)).returned),
+          (b) => b.addExpression(
+            literalList([
+              refer('super').property('members').spread,
+              ...names.map(refer),
+            ]).returned,
+          ),
         ),
     );
   }
 
-  Method _buildSetDependencies(Iterable<_DependencyPair> dependencies) {
+  Method? _buildSetDependencies(Iterable<_DependencyPair> dependencies) {
+    if (dependencies.isEmpty) return null;
+
     return Method.returnsVoid(
       (b) => b
         ..name = 'setDependencies'
@@ -121,14 +144,18 @@ class VmMixinGeneratorHelper {
               ..type = refer('ViewModelDependencySetter'),
           ),
         )
-        ..body = Block((b) => _addDependExpressions(b, dependencies)),
+        ..body = Block.of([
+          refer(
+            'super',
+          ).property('setDependencies').call([refer('depend')]).statement,
+          ..._buildDependStatements(dependencies),
+        ]),
     );
   }
 
-  BlockBuilder _addDependExpressions(
-    BlockBuilder b,
+  Iterable<Code> _buildDependStatements(
     Iterable<_DependencyPair> dependencies,
-  ) {
+  ) sync* {
     for (final dependency in dependencies) {
       final source = dependency.source.name;
       final target = dependency.target.name;
@@ -137,10 +164,8 @@ class VmMixinGeneratorHelper {
       final sourceRef = refer(isExternal ? 'param.$source' : source);
       final targetRef = refer(target);
 
-      b.addExpression(refer('depend').call([sourceRef, targetRef]));
+      yield refer('depend').call([sourceRef, targetRef]).statement;
     }
-
-    return b;
   }
 
   static final _acceptedType = TypeChecker.fromRuntime(MeovmAutoVm);
