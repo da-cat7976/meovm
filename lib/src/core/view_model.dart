@@ -19,7 +19,7 @@ abstract class ViewModel<Param extends ViewModelParameter?>
     implements ViewModelLifecycle<Param>, ViewModelMemberFactoryAccess {
   @mustBeOverridden
   @visibleForOverriding
-  List<ViewModelMember> get members;
+  List<ViewModelMember> get members => [];
 
   /// Current state of the ViewModel.
   ///
