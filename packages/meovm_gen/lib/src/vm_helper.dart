@@ -16,6 +16,8 @@ class VmMixinGeneratorHelper {
 
   final _memberChecker = TypeChecker.fromRuntime(MeovmAutoVmMember);
 
+  final _dependAnnotationChecker = TypeChecker.fromRuntime(MeovmDepend);
+
   bool canAccept(ClassElement element) {
     return _acceptedType.isAssignableFrom(element);
   }
@@ -92,9 +94,45 @@ class VmMixinGeneratorHelper {
       );
       initializer.visitChildren(collector);
 
+      final dependAnnotations = _dependAnnotationsOf(member);
+      final disabled = dependAnnotations.where((a) => a.disabled);
+      final disabledInternal = disabled.where((a) => !a.external).toSet();
+
       for (final internal in collector.internalDependencies) {
+        final isDisabled = disabledInternal.any(
+          (a) => a.dependOn == Symbol(internal.name),
+        );
+        if (isDisabled) continue;
+
         yield (source: internal, target: member, isExternal: false);
       }
+
+      final enabled = dependAnnotations.where((a) => !a.disabled);
+
+      for (final depend in enabled) {
+        final source = allMembers.firstWhereOrNull(
+          (e) => Symbol(e.name) == depend.dependOn,
+        );
+        if (source == null) {
+          throw InvalidGenerationSourceError(
+            'Could not find source dependency ${depend.dependOn}',
+            element: member,
+          );
+        }
+
+        yield (source: source, target: member, isExternal: depend.external);
+      }
+    }
+  }
+
+  Iterable<MeovmDepend> _dependAnnotationsOf(FieldElement element) sync* {
+    final annotations = _dependAnnotationChecker.annotationsOf(element);
+    for (final annotation in annotations) {
+      yield MeovmDepend(
+        Symbol(annotation.getField('dependOn')!.toSymbolValue()!),
+        external: annotation.getField('external')!.toBoolValue()!,
+        disabled: annotation.getField('disabled')!.toBoolValue()!,
+      );
     }
   }
 
