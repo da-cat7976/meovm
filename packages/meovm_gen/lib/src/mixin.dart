@@ -20,13 +20,11 @@ class VmMixinGenerator extends GeneratorForAnnotation<Meovm> {
       );
     }
 
-    final vmChecker = TypeChecker.fromRuntime(MeovmAutoVm);
-    if (vmChecker.isAssignableFrom(element)) {
+    if (vmHelper.canAccept(element)) {
       return vmHelper.generate(element, annotation, buildStep);
     }
 
-    final paramChecker = TypeChecker.fromRuntime(MeovmAutoVmParameter);
-    if (paramChecker.isAssignableFrom(element)) {
+    if (paramHelper.canAccept(element)) {
       return paramHelper.generate(element, annotation, buildStep);
     }
 

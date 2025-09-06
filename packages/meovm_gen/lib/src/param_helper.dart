@@ -14,6 +14,10 @@ class ParamMixinGeneratorHelper {
 
   final _memberChecker = TypeChecker.fromRuntime(MeovmAutoVmMember);
 
+  bool canAccept(ClassElement element) {
+    return _acceptedType.isAssignableFrom(element);
+  }
+
   Future<String> generate(
     ClassElement element,
     ConstantReader annotation,
@@ -93,4 +97,6 @@ class ParamMixinGeneratorHelper {
         ..body = body,
     );
   }
+
+  static final _acceptedType = TypeChecker.fromRuntime(MeovmAutoVmParameter);
 }
