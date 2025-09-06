@@ -7,7 +7,9 @@ final class Meovm {
 
 @Target({TargetKind.field})
 final class MeovmDepend {
-  const MeovmDepend(this.dependOn);
+  const MeovmDepend(this.dependOn, {bool this.external = false});
 
   final Symbol dependOn;
+
+  final bool external;
 }
