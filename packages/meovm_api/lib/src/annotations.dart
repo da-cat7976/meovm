@@ -9,11 +9,14 @@ final class Meovm {
 final class MeovmDepend {
   const MeovmDepend(
     this.dependOn, {
+    this.from,
     this.external = false,
     this.disabled = false,
   });
 
   final Symbol dependOn;
+
+  final Symbol? from;
 
   final bool external;
 
@@ -25,9 +28,11 @@ final class MeovmDepend {
       other is MeovmDepend &&
           runtimeType == other.runtimeType &&
           dependOn == other.dependOn &&
+          from == other.from &&
           external == other.external &&
           disabled == other.disabled;
 
   @override
-  int get hashCode => dependOn.hashCode ^ external.hashCode ^ disabled.hashCode;
+  int get hashCode =>
+      dependOn.hashCode ^ from.hashCode ^ external.hashCode ^ disabled.hashCode;
 }
