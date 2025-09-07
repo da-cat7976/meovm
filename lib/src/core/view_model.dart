@@ -8,7 +8,8 @@ import 'package:meta/meta.dart';
 typedef ViewModelDependencySetter =
     void Function(ViewModelMember source, ViewModelMember target);
 
-typedef _DisposeListener = void Function(ViewModelMember disposed);
+@visibleForTesting
+typedef DisposeListener = void Function(ViewModelMember disposed);
 
 /// Base class for ViewModel, providing lifecycle implementation,
 /// member management, and their dependencies.
@@ -124,7 +125,7 @@ abstract class ViewModel<Param extends ViewModelParameter?>
       final listener = _dependencyListeners[invalidated];
       if (listener == null) continue;
 
-      invalidated._lifecycleAwareRemoveListener(listener);
+      invalidated.lifecycleAwareRemoveListener(listener);
       _dependencyListeners.remove(invalidated);
     }
 
@@ -154,7 +155,7 @@ abstract class ViewModel<Param extends ViewModelParameter?>
       // ? listened for disposal, but this should have no effect since
       // ? dispose listener is removed before calling .dispose() on internal
       // ? members.
-      source._addDisposeListener(_memberDisposeListener);
+      source.addDisposeListener(_memberDisposeListener);
 
       // ? In some cases this mechanism can call targets twice due to
       // ? complexity of dependencies. It's not a big deal since member's
@@ -231,7 +232,7 @@ abstract class ViewModel<Param extends ViewModelParameter?>
 
     for (final member in _dependencyListeners.keys) {
       member.removeListener(_dependencyListeners[member]!);
-      member._removeDisposeListener(_memberDisposeListener);
+      member.removeDisposeListener(_memberDisposeListener);
     }
 
     for (final member in _members) {
@@ -295,7 +296,7 @@ abstract class ViewModelMember implements ViewModelMemberBase {
 
   ViewModelOwner? _owner;
 
-  final List<_DisposeListener> _disposeListeners = [];
+  final List<DisposeListener> _disposeListeners = [];
 
   @override
   @mustCallSuper
@@ -324,15 +325,18 @@ abstract class ViewModelMember implements ViewModelMemberBase {
     _disposeListeners.clear();
   }
 
-  void _addDisposeListener(_DisposeListener listener) {
+  @visibleForTesting
+  void addDisposeListener(DisposeListener listener) {
     _disposeListeners.add(listener);
   }
 
-  void _removeDisposeListener(_DisposeListener listener) {
+  @visibleForTesting
+  void removeDisposeListener(DisposeListener listener) {
     _disposeListeners.remove(listener);
   }
 
-  void _lifecycleAwareRemoveListener(VoidCallback listener) {
+  @visibleForTesting
+  void lifecycleAwareRemoveListener(VoidCallback listener) {
     if (_owner == null) return;
     removeListener(listener);
   }
