@@ -1,5 +1,5 @@
 /// Empty interface of view model used for code generation.
-abstract interface class MeovmAutoVm {
+abstract interface class MeovmAutoVm<Param extends MeovmAutoVmParameter?> {
   // Intentionally left blank
 }
 

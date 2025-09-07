@@ -41,7 +41,7 @@ enum ViewModelState {
 /// An interface for the lifecycle of the ViewModel, enabling its integration
 /// with the State owner.
 abstract interface class ViewModelLifecycle<Param extends ViewModelParameter?>
-    implements MeovmAutoVm {
+    implements MeovmAutoVm<Param> {
   /// The current state of the ViewModel.
   ViewModelState get state;
 
