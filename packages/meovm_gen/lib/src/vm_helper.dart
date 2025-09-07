@@ -18,7 +18,7 @@ class VmMixinGeneratorHelper {
   );
 
   bool canAccept(ClassElement element) {
-    return _acceptedType.isAssignableFrom(element);
+    return _vmChecker.isAssignableFrom(element);
   }
 
   Future<String> generate(
@@ -79,7 +79,7 @@ class VmMixinGeneratorHelper {
     InterfaceElement element,
   ) sync* {
     final supertype = element.allSupertypes.firstWhereOrNull(
-      (e) => _acceptedType.isExactlyType(e),
+      (e) => _vmChecker.isExactlyType(e),
     );
     if (supertype is! InterfaceType) return;
 
@@ -96,14 +96,19 @@ class VmMixinGeneratorHelper {
     InterfaceElement element,
   ) sync* {
     for (final field in element.fields) {
-      if (_memberChecker.isAssignableFromType(field.type)) {
+      final type = field.type;
+
+      if (_memberChecker.isAssignableFromType(type)) {
         yield _ExternalMemberInfo(field);
       }
 
-      if (_acceptedType.isAssignableFromType(field.type)) {
+      if (_vmChecker.isAssignableFromType(type)) {
+        final vmClass = type.element;
+        if (vmClass is! InterfaceElement) continue;
+
         final members = [
-          ..._getMembers(element),
-          ..._getInheritedMembers(element),
+          ..._getMembers(vmClass),
+          ..._getInheritedMembers(vmClass),
         ];
 
         for (final member in members) {
@@ -276,7 +281,7 @@ class VmMixinGeneratorHelper {
     }
   }
 
-  static final _acceptedType = TypeChecker.fromRuntime(MeovmAutoVm);
+  static final _vmChecker = TypeChecker.fromRuntime(MeovmAutoVm);
 
   static final _memberChecker = TypeChecker.fromRuntime(MeovmAutoVmMember);
 
@@ -389,11 +394,13 @@ class _MemberDependenciesCollector extends RecursiveAstVisitor<void> {
       return;
     }
 
-    if(externalMembers.isNotEmpty) {
+    if (current.name == 'vmValue' && node.name == 'value') {
       print('gotcha');
     }
 
-    final external = externalMembers.firstWhereOrNull((e) => e.isSame(element.variable2));
+    final external = externalMembers.firstWhereOrNull(
+      (e) => e.isSame(element.variable2),
+    );
     if (external != null) {
       _external.add(external);
       return;
