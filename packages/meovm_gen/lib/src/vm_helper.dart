@@ -47,7 +47,7 @@ class VmMixinGeneratorHelper {
     final mixin = Mixin(
       (b) => b
         ..name = '_\$${element.name}'
-        ..on = refer('ViewModel')
+        ..on = refer(element.supertype!.getDisplayString())
         ..methods.addAll(
           [...definitions, ?memberList, ?setDependencies], // fmt
         ),
