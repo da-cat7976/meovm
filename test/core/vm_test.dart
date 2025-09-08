@@ -139,7 +139,7 @@ class _TestVm extends ViewModel {
 
 final class _TestParam extends ViewModelParameter {
   @override
-  bool shouldUpdateDependencies(ViewModelParameter oldParam) {
+  bool shouldUpdateDependencies(covariant _TestParam? oldParam) {
     return false;
   }
 }
