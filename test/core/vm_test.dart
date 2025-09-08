@@ -17,6 +17,7 @@ class VmLifecycleTests {
       withMember();
       withDependencies();
       assertOnCircularDependency();
+      paramHandling();
     });
   }
 
@@ -76,11 +77,7 @@ class VmLifecycleTests {
       expect(() => vm.update(), returnsNormally);
       expect(() => vm.dispose(), returnsNormally);
 
-      verifyInOrder([
-        member1.update(),
-        member3.update(),
-        member2.update(),
-      ]);
+      verifyInOrder([member1.update(), member3.update(), member2.update()]);
     });
   }
 
@@ -105,6 +102,25 @@ class VmLifecycleTests {
       expect(() => vm.init(owner), throwsAssertionError);
     });
   }
+
+  void paramHandling() {
+    test('Param availability', () {
+      final owner = MockViewModelOwner<_TestParam?>();
+      final param1 = _TestParam();
+      when(owner.param).thenReturn(param1);
+
+      final vm = _TestVm(members: []);
+      expect(() => vm.init(owner), returnsNormally);
+      // ignore: invalid_use_of_protected_member
+      expect(vm.param, equals(param1));
+
+      final param2 = _TestParam();
+      when(owner.param).thenReturn(param2);
+      expect(() => vm.update(), returnsNormally);
+      // ignore: invalid_use_of_protected_member
+      expect(vm.param, equals(param2));
+    });
+  }
 }
 
 class _TestVm extends ViewModel {
@@ -118,5 +134,12 @@ class _TestVm extends ViewModel {
   @override
   void setDependencies(ViewModelDependencySetter depend) {
     setDeps?.call(depend);
+  }
+}
+
+final class _TestParam extends ViewModelParameter {
+  @override
+  bool shouldUpdateDependencies(ViewModelParameter oldParam) {
+    return false;
   }
 }
