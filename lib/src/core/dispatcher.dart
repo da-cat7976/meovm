@@ -22,7 +22,7 @@ mixin ViewModelDispatcherBase<
 mixin ViewModelDispatcherStateBase<
   W extends ViewModelDispatcherBase<VM, Param>,
   VM extends ViewModelLifecycle<Param>,
-  Param extends ViewModelParameter
+  Param extends ViewModelParameter?
 >
     on State<W>
     implements ViewModelOwner<Param> {
@@ -56,7 +56,7 @@ mixin ViewModelDispatcherStateBase<
     super.initState();
 
     _features = features;
-    for(final feature in _features) {
+    for (final feature in _features) {
       feature.init();
     }
 
@@ -70,12 +70,13 @@ mixin ViewModelDispatcherStateBase<
   void didUpdateWidget(covariant W oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    for(final feature in _features) {
+    for (final feature in _features) {
       feature.didUpdateWidget();
     }
 
     final param = _param = widget.param;
-    if (param.shouldUpdateDependencies(oldWidget.param)) {
+    final oldParam = oldWidget.param;
+    if (param?.shouldUpdateDependencies(oldParam) ?? false) {
       _viewModel.updateDependencies();
     }
 
@@ -87,7 +88,7 @@ mixin ViewModelDispatcherStateBase<
   @override
   @mustCallSuper
   void dispose() {
-    for(final feature in _features) {
+    for (final feature in _features) {
       feature.dispose();
     }
 
