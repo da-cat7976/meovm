@@ -180,3 +180,42 @@ extension ViewModelContext on BuildContext {
     return inherited?.param;
   }
 }
+
+class ViewModelDispatcher<
+  VM extends ViewModelLifecycle<Param>,
+  Param extends ViewModelParameter?
+>
+    extends StatefulWidget
+    with ViewModelDispatcherBase<VM, Param> {
+  const ViewModelDispatcher({
+    super.key,
+    required this.child,
+    required this.factory,
+    required this.param,
+  });
+
+  @override
+  final ViewModelFactory<VM, Param> factory;
+
+  @override
+  final Param param;
+
+  @override
+  final Widget child;
+
+  @override
+  ViewModelDispatcherState<VM, Param> createState() {
+    return ViewModelDispatcherState<VM, Param>();
+  }
+}
+
+class ViewModelDispatcherState<
+  VM extends ViewModelLifecycle<Param>,
+  Param extends ViewModelParameter?
+>
+    extends State<ViewModelDispatcher<VM, Param>>
+    with
+        ViewModelDispatcherStateBase<ViewModelDispatcher<VM, Param>, VM, Param>,
+        TickerProviderStateMixin {
+  // Intentionally left blank
+}
