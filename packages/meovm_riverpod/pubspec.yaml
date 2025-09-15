@@ -1,20 +1,19 @@
 name: meovm_riverpod
 description: "Riverpod integration for meovm"
 version: 0.0.1
-# TODO: Remove after pub release
-publish_to: none
+publish_to: pub.dev
 
 environment:
   sdk: ^3.9.0
   flutter: ">=3.0.0"
 
+resolution: workspace
+
 dependencies:
   flutter:
     sdk: flutter
-  flutter_riverpod: ^2.6.1
-  # TODO: Remove path dependency after pub release
-  meovm:
-    path: ../meovm
+  flutter_riverpod: ^3.0.0
+  meovm: ^0.0.1
   meta: ^1.17.0
 
 dev_dependencies:

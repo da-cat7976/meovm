@@ -6,6 +6,8 @@ environment:
   sdk: ^3.9.0
   flutter: ">=3.0.0"
 
+resolution: workspace
+
 dependencies:
   collection: ^1.19.1
   flutter:
@@ -13,14 +15,13 @@ dependencies:
   flutter_hooks: ^0.21.3+1
   graphs: ^2.3.2
   meta: ^1.16.0
-  meovm_api:
-    path: ../meovm_api
+  meovm_api: ^1.0.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
-  mockito: ^5.5.1
-  build_runner: ^2.8.0
+  mockito: ^5.0.0
+  build_runner: ^2.5.4
 
 flutter:

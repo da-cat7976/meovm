@@ -1,0 +1,10 @@
+name: _
+publish_to: none
+environment:
+  sdk: ^3.9.0
+
+workspace:
+  - packages/meovm
+  - packages/meovm_api
+  - packages/meovm_gen
+  - packages/meovm_riverpod
