@@ -1,0 +1,15 @@
+# https://taskfile.dev
+
+version: '3'
+
+tasks:
+  coverage:
+    cmds:
+      - flutter test --coverage
+      - genhtml coverage/lcov.info -o coverage/html
+    silent: true
+
+  gen:
+    silent: true
+    cmds:
+      - dart run build_runner build --delete-conflicting-outputs
