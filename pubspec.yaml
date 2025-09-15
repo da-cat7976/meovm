@@ -8,3 +8,4 @@ workspace:
   - packages/meovm_api
   - packages/meovm_gen
   - packages/meovm_riverpod
+  - packages/meovm_gen_test
