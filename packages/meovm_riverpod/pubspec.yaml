@@ -14,7 +14,7 @@ dependencies:
   flutter_riverpod: ^2.6.1
   # TODO: Remove path dependency after pub release
   meovm:
-    path: ../../
+    path: ../meovm
   meta: ^1.17.0
 
 dev_dependencies:
