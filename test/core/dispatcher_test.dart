@@ -4,7 +4,7 @@ import 'package:meovm/meovm.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
-@GenerateNiceMocks([MockSpec<ViewModel>()])
+@GenerateNiceMocks([MockSpec<ViewModel>(), MockSpec<ViewModelOwnerFeature>()])
 import 'dispatcher_test.mocks.dart';
 
 void main() {
@@ -16,15 +16,17 @@ class VmDispatcherTests {
     group('ViewModel dispatcher lifecycle', () {
       normalLifecycle();
       paramHandling();
+      features();
     });
   }
 
   void normalLifecycle() {
     testWidgets('Normal lifecycle', (tester) async {
       final vm = MockViewModel<Null>();
-      final dispatcher = _TestVmDispatcher<MockViewModel<Null>, Null>(
+      final dispatcher = ViewModelDispatcher<MockViewModel<Null>, Null>(
         factory: () => vm,
         param: null,
+        child: SizedBox(),
       );
 
       await tester.pumpWidget(dispatcher);
@@ -41,14 +43,15 @@ class VmDispatcherTests {
       final param1 = _TestParam();
 
       await tester.pumpWidget(
-        _TestVmDispatcher<MockViewModel<_TestParam>, _TestParam>(
+        ViewModelDispatcher<MockViewModel<_TestParam>, _TestParam>(
           key: key,
           factory: () => vm,
           param: param1,
+          child: SizedBox(),
         ),
       );
 
-      _TestVmDispatcherState<MockViewModel<_TestParam>, _TestParam> state =
+      ViewModelDispatcherState<MockViewModel<_TestParam>, _TestParam> state =
           tester.firstState(find.byKey(key));
 
       expect(state.param, equals(param1));
@@ -56,10 +59,11 @@ class VmDispatcherTests {
       final param2 = _TestParam();
 
       await tester.pumpWidget(
-        _TestVmDispatcher<MockViewModel<_TestParam>, _TestParam>(
+        ViewModelDispatcher<MockViewModel<_TestParam>, _TestParam>(
           key: key,
           factory: () => vm,
           param: param2,
+          child: SizedBox(),
         ),
       );
 
@@ -67,41 +71,48 @@ class VmDispatcherTests {
       verify(vm.updateDependencies()).called(1);
     });
   }
+
+  void features() {
+    testWidgets('Feature lifecycle test', (tester) async {
+      final key = UniqueKey();
+      final vm = MockViewModel<_TestParam>();
+      final feature = MockViewModelOwnerFeature();
+
+      final param1 = _TestParam();
+      await tester.pumpWidget(
+        ViewModelDispatcher.test(
+          key: key,
+          factory: () => vm,
+          param: param1,
+          features: [feature],
+          child: SizedBox(),
+        ),
+      );
+
+      ViewModelDispatcherState<MockViewModel<_TestParam>, _TestParam> state =
+          tester.firstState(find.byKey(key));
+      expect(state.getFeature<MockViewModelOwnerFeature>(), equals(feature));
+
+      final param2 = _TestParam();
+      await tester.pumpWidget(
+        ViewModelDispatcher.test(
+          key: key,
+          factory: () => vm,
+          param: param2,
+          features: [feature],
+          child: SizedBox(),
+        ),
+      );
+
+      await tester.pumpWidget(Container());
+      verifyInOrder([
+        feature.init(),
+        feature.didUpdateWidget(),
+        feature.dispose(),
+      ]);
+    });
+  }
 }
-
-class _TestVmDispatcher<
-  VM extends ViewModel<Param>,
-  Param extends ViewModelParameter?
->
-    extends StatefulWidget
-    with ViewModelDispatcherBase<VM, Param> {
-  const _TestVmDispatcher({
-    required this.factory,
-    required this.param,
-    super.key,
-  });
-
-  @override
-  final Widget child = const SizedBox();
-
-  @override
-  final ViewModelFactory<VM, Param> factory;
-
-  @override
-  final Param param;
-
-  @override
-  State<StatefulWidget> createState() => _TestVmDispatcherState<VM, Param>();
-}
-
-class _TestVmDispatcherState<
-  VM extends ViewModel<Param>,
-  Param extends ViewModelParameter?
->
-    extends State<_TestVmDispatcher<VM, Param>>
-    with
-        ViewModelDispatcherStateBase<_TestVmDispatcher<VM, Param>, VM, Param>,
-        TickerProviderStateMixin {}
 
 final class _TestParam extends ViewModelParameter {
   @override

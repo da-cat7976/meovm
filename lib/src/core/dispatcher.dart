@@ -106,11 +106,13 @@ mixin ViewModelDispatcherStateBase<
     );
   }
 
+  // coverage:ignore-start
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     _viewModel.debugFillProperties(properties);
   }
+  // coverage:ignore-end
 }
 
 class ViewModelProvider<VM extends ViewModelLifecycle> extends InheritedWidget {
@@ -135,6 +137,9 @@ class ViewModelParamProvider<Param> extends InheritedWidget {
       oldWidget.param != param;
 }
 
+// ? Since this is an extension providing access to VMs and params using
+// ? InheritedWidget mechanism, testing this code is not necessary.
+// coverage:ignore-start
 extension ViewModelContext on BuildContext {
   // ignore: strict_raw_type
   VM useVM<VM extends ViewModelLifecycle>({bool listen = true}) {
@@ -180,6 +185,7 @@ extension ViewModelContext on BuildContext {
     return inherited?.param;
   }
 }
+// coverage:ignore-end
 
 class ViewModelDispatcher<
   VM extends ViewModelLifecycle<Param>,
@@ -192,7 +198,16 @@ class ViewModelDispatcher<
     required this.child,
     required this.factory,
     required this.param,
-  });
+  }) : _features = const [];
+
+  @visibleForTesting
+  const ViewModelDispatcher.test({
+    super.key,
+    required this.child,
+    required this.factory,
+    required this.param,
+    required List<ViewModelOwnerFeature> features,
+  }) : _features = features;
 
   @override
   final ViewModelFactory<VM, Param> factory;
@@ -202,6 +217,8 @@ class ViewModelDispatcher<
 
   @override
   final Widget child;
+
+  final List<ViewModelOwnerFeature> _features;
 
   @override
   ViewModelDispatcherState<VM, Param> createState() {
@@ -217,5 +234,6 @@ class ViewModelDispatcherState<
     with
         ViewModelDispatcherStateBase<ViewModelDispatcher<VM, Param>, VM, Param>,
         TickerProviderStateMixin {
-  // Intentionally left blank
+  @override
+  List<ViewModelOwnerFeature> get features => widget._features;
 }
