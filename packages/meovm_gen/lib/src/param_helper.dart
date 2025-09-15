@@ -70,11 +70,13 @@ class ParamMixinGeneratorHelper {
 
       final first = checked.first;
       Expression exp = refer(
-        'oldParam.${first.name}',
-      ).notEqualTo(refer(first.name));
+        'oldParam',
+      ).nullSafeProperty(first.name).notEqualTo(refer(first.name));
       for (final field in checked.skip(1)) {
         exp = exp.or(
-          refer('oldParam.${field.name}').notEqualTo(refer(field.name)),
+          refer(
+            'oldParam',
+          ).nullSafeProperty(field.name).notEqualTo(refer(field.name)),
         );
       }
 
@@ -90,7 +92,7 @@ class ParamMixinGeneratorHelper {
           Parameter(
             (b) => b
               ..name = 'oldParam'
-              ..type = refer(element.name)
+              ..type = refer('${element.name}?')
               ..covariant = true,
           ),
         )

@@ -109,5 +109,5 @@ abstract base mixin class ViewModelParameter implements MeovmAutoVmParameter {
 
   /// Compares this with [oldParam] and returns `true` if this has changes
   /// in its fields that should trigger a dependency update.
-  bool shouldUpdateDependencies(ViewModelParameter oldParam);
+  bool shouldUpdateDependencies(ViewModelParameter? oldParam);
 }
