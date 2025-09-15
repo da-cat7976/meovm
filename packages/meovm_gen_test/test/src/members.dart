@@ -2,6 +2,7 @@ import 'package:meovm/meovm.dart';
 import 'package:meovm_api/meovm_api.dart';
 import 'package:source_gen_test/annotations.dart';
 
+part 'golden/manual_dependencies.dart';
 part 'golden/members.dart';
 part 'golden/method_invoking.dart';
 
@@ -30,4 +31,16 @@ class MethodInvokingVm extends ViewModel with _$MethodInvokingVm {
   int _resolver(int? data) {
     return valueA.data + valueB.data;
   }
+}
+
+@ShouldGenerateFile('golden/manual_dependencies.dart', partOfCurrent: true)
+@Meovm()
+class ManualDependenciesVm extends ViewModel with _$ManualDependenciesVm {
+  @override
+  @MeovmDepend(#valueB)
+  late final valueA = ValueMember<int>();
+
+  @override
+  @MeovmDepend(#valueA, disabled: true)
+  late final valueB = ValueMember<int>(resolver: (_) => valueA.data + 1);
 }
