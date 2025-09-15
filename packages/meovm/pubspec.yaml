@@ -1,7 +1,6 @@
-name: meovm_riverpod
-description: "Riverpod integration for meovm"
+name: meovm
+description: "A MVVM framework for Flutter"
 version: 0.0.1
-publish_to: pub.dev
 
 environment:
   sdk: ^3.9.0
@@ -10,16 +9,19 @@ environment:
 resolution: workspace
 
 dependencies:
+  collection: ^1.19.1
   flutter:
     sdk: flutter
-  flutter_riverpod: ^3.0.0
-  meovm: ^0.0.1
-  meta: ^1.17.0
+  flutter_hooks: ^0.21.3+1
+  graphs: ^2.3.2
+  meta: ^1.16.0
+  meovm_api: ^1.0.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+  mockito: ^5.0.0
+  build_runner: ^2.5.4
 
-dependency_overrides:
-  meta: ^1.17.0
+flutter:

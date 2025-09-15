@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meovm/meovm.dart';
@@ -175,7 +176,7 @@ class _CounterGroup extends AsyncNotifier<int> {
     state = const AsyncLoading();
     // simulate async work
     await Future<void>.delayed(const Duration(milliseconds: 20));
-    final current = state.valueOrNull ?? 0;
+    final current = state.value ?? 0;
     state = AsyncData(current + 1);
   }
 }

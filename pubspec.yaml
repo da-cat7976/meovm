@@ -1,26 +1,11 @@
-name: meovm
-description: "A MVVM framework for Flutter"
-version: 0.0.1
-
+name: _
+publish_to: none
 environment:
   sdk: ^3.9.0
-  flutter: ">=3.0.0"
 
-dependencies:
-  collection: ^1.19.1
-  flutter:
-    sdk: flutter
-  flutter_hooks: ^0.21.3+1
-  graphs: ^2.3.2
-  meta: ^1.16.0
-  meovm_api:
-    path: packages/meovm_api
-
-dev_dependencies:
-  flutter_test:
-    sdk: flutter
-  flutter_lints: ^6.0.0
-  mockito: ^5.5.1
-  build_runner: ^2.8.0
-
-flutter:
+workspace:
+  - packages/meovm
+  - packages/meovm_api
+  - packages/meovm_gen
+  - packages/meovm_riverpod
+  - packages/meovm_gen_test

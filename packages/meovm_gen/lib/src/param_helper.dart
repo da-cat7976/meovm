@@ -1,4 +1,4 @@
-import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/element2.dart';
 import 'package:build/build.dart';
 import 'package:code_builder/code_builder.dart';
 import 'package:dart_style/dart_style.dart';
@@ -10,16 +10,19 @@ class ParamMixinGeneratorHelper {
     languageVersion: DartFormatter.latestLanguageVersion,
   );
 
-  final _vmChecker = TypeChecker.fromRuntime(MeovmAutoVm);
+  final _vmChecker = TypeChecker.typeNamed(MeovmAutoVm, inPackage: 'meovm_api');
 
-  final _memberChecker = TypeChecker.fromRuntime(MeovmAutoVmMember);
+  final _memberChecker = TypeChecker.typeNamed(
+    MeovmAutoVmMember,
+    inPackage: 'meovm_api',
+  );
 
-  bool canAccept(ClassElement element) {
-    return _acceptedType.isAssignableFrom(element);
+  bool canAccept(ClassElement2 element) {
+    return _acceptedType.isAssignableFromType(element.thisType);
   }
 
   Future<String> generate(
-    ClassElement element,
+    ClassElement2 element,
     ConstantReader annotation,
     BuildStep buildStep,
   ) async {
@@ -29,7 +32,7 @@ class ParamMixinGeneratorHelper {
 
     final mixin = Mixin(
       (b) => b
-        ..name = '_\$${element.name}'
+        ..name = '_\$${element.name3}'
         ..on = refer('ViewModelParameter')
         ..methods.addAll([..._buildDefinitions(checked), shouldUpdate])
         ..base = true,
@@ -38,8 +41,8 @@ class ParamMixinGeneratorHelper {
     return _formatter.format('${mixin.accept(DartEmitter())}');
   }
 
-  Iterable<FieldElement> _getChecked(ClassElement element) sync* {
-    for (final field in element.fields) {
+  Iterable<FieldElement2> _getChecked(ClassElement2 element) sync* {
+    for (final field in element.fields2) {
       if (_vmChecker.isAssignableFromType(field.type)) {
         yield field;
       }
@@ -50,18 +53,21 @@ class ParamMixinGeneratorHelper {
     }
   }
 
-  Iterable<Method> _buildDefinitions(Iterable<FieldElement> members) sync* {
+  Iterable<Method> _buildDefinitions(Iterable<FieldElement2> members) sync* {
     for (final member in members) {
       yield Method(
         (b) => b
-          ..name = member.name
+          ..name = member.name3
           ..returns = refer(member.type.getDisplayString())
           ..type = MethodType.getter,
       );
     }
   }
 
-  Method _buildShouldUpdate(ClassElement element, List<FieldElement> checked) {
+  Method _buildShouldUpdate(
+    ClassElement2 element,
+    List<FieldElement2> checked,
+  ) {
     final body = Block((b) {
       if (checked.isEmpty) {
         b.addExpression(literalFalse.returned);
@@ -71,12 +77,12 @@ class ParamMixinGeneratorHelper {
       final first = checked.first;
       Expression exp = refer(
         'oldParam',
-      ).nullSafeProperty(first.name).notEqualTo(refer(first.name));
+      ).nullSafeProperty(first.name3!).notEqualTo(refer(first.name3!));
       for (final field in checked.skip(1)) {
         exp = exp.or(
           refer(
             'oldParam',
-          ).nullSafeProperty(field.name).notEqualTo(refer(field.name)),
+          ).nullSafeProperty(field.name3!).notEqualTo(refer(field.name3!)),
         );
       }
 
@@ -92,7 +98,7 @@ class ParamMixinGeneratorHelper {
           Parameter(
             (b) => b
               ..name = 'oldParam'
-              ..type = refer('${element.name}?')
+              ..type = refer('${element.name3}?')
               ..covariant = true,
           ),
         )
@@ -100,5 +106,8 @@ class ParamMixinGeneratorHelper {
     );
   }
 
-  static final _acceptedType = TypeChecker.fromRuntime(MeovmAutoVmParameter);
+  static final _acceptedType = TypeChecker.typeNamed(
+    MeovmAutoVmParameter,
+    inPackage: 'meovm_api',
+  );
 }
