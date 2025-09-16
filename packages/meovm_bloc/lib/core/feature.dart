@@ -24,7 +24,15 @@ class BlocViewModelOwnerFeature
     // Intentionally left blank
   }
 
-  B getBloc<B extends StateStreamable>() {
+  B getBloc<B extends StateStreamable<S>, S>() {
     return state.context.read<B>();
+  }
+}
+
+extension BlocViewModelOwnerExtension<Param extends ViewModelParameter?>
+    on ViewModelOwner<Param> {
+  B getBloc<B extends StateStreamable<S>, S>() {
+    final feature = getFeature<BlocViewModelOwnerFeature>();
+    return feature.getBloc<B, S>();
   }
 }
