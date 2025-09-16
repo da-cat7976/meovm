@@ -14,31 +14,32 @@ typedef StreamMemberDoneListener = void Function();
 abstract class StreamMemberBase<T> extends BuildableViewModelMember
     with ChangeNotifier, FreezableDataMixin<T> {
   @visibleForOverriding
-  StreamMemberResolver<T> get resolve;
-
-  @visibleForOverriding
   StreamMemberErrorListener? get onError => null;
 
   @visibleForOverriding
-  StreamMemberDoneListener? get onDone => null;
+  bool get cancelOnError => false;
 
-  @visibleForOverriding
-  bool get cancelOnError => true;
+  @nonVirtual
+  bool get wasChanged => _wasChanged;
+
+  @nonVirtual
+  bool get isActive => _subscription != null;
 
   Stream<T>? _stream;
 
   StreamSubscription<T>? _subscription;
 
-  @nonVirtual
-  bool get wasChanged => _wasChanged;
-
   bool _wasChanged = false;
+
+  @protected
+  Stream<T> resolve();
 
   @override
   @mustCallSuper
   void update() {
     final updated = resolve();
     if (updated != _stream) {
+      _stream = updated;
       _subscription?.cancel();
       _subscription = updated.listen(
         onEvent,
@@ -49,14 +50,27 @@ abstract class StreamMemberBase<T> extends BuildableViewModelMember
     }
   }
 
+  @protected
+  void notifyChanged() {
+    _wasChanged = true;
+    notifyListeners();
+  }
+
+  @protected
   @mustCallSuper
   void onEvent(T event) {
     final current = dataOrNull;
     final updated = updateData(event);
     if (updated == current) return;
 
-    _wasChanged = true;
-    notifyListeners();
+    notifyChanged();
+  }
+
+  @protected
+  @mustCallSuper
+  void onDone() {
+    _subscription?.cancel();
+    _stream = _subscription = null;
   }
 
   @override
@@ -76,21 +90,21 @@ abstract class StreamMemberBase<T> extends BuildableViewModelMember
 
 class StreamMember<T> extends StreamMemberBase<T> {
   StreamMember({
-    required this.resolve,
+    required this.resolver,
     this.onError,
-    this.onDone,
     required this.cancelOnError,
   });
 
-  @override
-  final StreamMemberResolver<T> resolve;
+  final StreamMemberResolver<T> resolver;
 
   @override
   final StreamMemberErrorListener? onError;
 
   @override
-  final StreamMemberDoneListener? onDone;
+  final bool cancelOnError;
 
   @override
-  final bool cancelOnError;
+  Stream<T> resolve() {
+    return resolver();
+  }
 }
