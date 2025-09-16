@@ -5,7 +5,7 @@ import 'package:meovm_riverpod/src/core/feature.dart';
 
 class RiverpodVmDispatcher<
   VM extends ViewModelLifecycle<Param>,
-  Param extends ViewModelParameter
+  Param extends ViewModelParameter?
 >
     extends ConsumerStatefulWidget
     with ViewModelDispatcherBase<VM, Param> {
@@ -33,7 +33,7 @@ class RiverpodVmDispatcher<
 
 class RiverpodVmDispatcherState<
   VM extends ViewModelLifecycle<Param>,
-  Param extends ViewModelParameter
+  Param extends ViewModelParameter?
 >
     extends ConsumerState<RiverpodVmDispatcher<VM, Param>>
     with
@@ -45,6 +45,6 @@ class RiverpodVmDispatcherState<
         TickerProviderStateMixin {
   @override
   List<ViewModelOwnerFeature> get features => [
-    RiverpodViewModelOwnerFeature(ref: () => ref),
+    RiverpodViewModelOwnerFeature(),
   ];
 }

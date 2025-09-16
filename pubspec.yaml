@@ -9,3 +9,4 @@ workspace:
   - packages/meovm_gen
   - packages/meovm_riverpod
   - packages/meovm_gen_test
+  - packages/meovm_bloc

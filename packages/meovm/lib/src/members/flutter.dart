@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:meovm/src/core/api.dart';
 import 'package:meovm/src/members/common.dart';
+import 'package:meovm/src/members/utils.dart';
 
 typedef MemberInitializer<T> = T Function();
 
@@ -12,7 +13,7 @@ typedef MemberUpdaterWithResult<T extends Listenable, R> = R Function(T ctr);
 /// A member that allows the ViewModel to work with a [TextEditingController].
 ///
 /// Changes to the [TextEditingController] are tracked by this member.
-class EditableTextMember extends BuildableViewModelMember {
+class EditableTextMember extends BuildableViewModelMember with ChangeTracker {
   EditableTextMember({
     this.initText,
     this.onUpdate,
@@ -52,13 +53,7 @@ class EditableTextMember extends BuildableViewModelMember {
     return controller!;
   }
 
-  /// {@macro view_model_member.wasChanged}
-  @nonVirtual
-  bool get wasChanged => _wasChanged;
-
   TextEditingController? _controller;
-
-  bool _wasChanged = false;
 
   @override
   void init(ViewModelOwner owner) {
@@ -66,7 +61,7 @@ class EditableTextMember extends BuildableViewModelMember {
 
     final initial = initText?.call() ?? '';
     _controller = TextEditingController(text: initial);
-    _controller!.addListener(() => _wasChanged = true);
+    _controller!.addListener(notifyChanged);
   }
 
   @override
@@ -77,11 +72,6 @@ class EditableTextMember extends BuildableViewModelMember {
   @override
   void addListener(VoidCallback listener) {
     controller.addListener(listener);
-  }
-
-  @override
-  void notifyUpdateCompleted() {
-    _wasChanged = false;
   }
 
   @override
@@ -98,16 +88,16 @@ class EditableTextMember extends BuildableViewModelMember {
 
   @override
   DiagnosticsNode toDiagnosticsNode() => StringProperty(
-        debugName,
-        _controller?.text ?? '<non ready>',
-        tooltip: 'Editable text. Selection: ${_controller?.selection}',
-      );
+    debugName,
+    _controller?.text ?? '<non ready>',
+    tooltip: 'Editable text. Selection: ${_controller?.selection}',
+  );
 }
 
 /// A member that allows the ViewModel to work with an [AnimationController].
 ///
 /// Changes to the [AnimationController] are tracked by this member.
-class AnimationMember extends BuildableViewModelMember {
+class AnimationMember extends BuildableViewModelMember with ChangeTracker {
   AnimationMember({
     required this.initController,
     this.onUpdate,
@@ -152,32 +142,20 @@ class AnimationMember extends BuildableViewModelMember {
     return controller!;
   }
 
-  /// {@macro view_model_member.wasChanged}
-  @nonVirtual
-  bool get wasChanged => _wasChanged;
-
   AnimationController? _controller;
-
-  bool _wasChanged = false;
 
   @override
   void init(ViewModelOwner owner) {
     super.init(owner);
 
     _controller = initController();
-    _controller!.addListener(() => _wasChanged = true);
+    _controller!.addListener(notifyChanged);
   }
 
   @override
   @mustCallSuper
   void update() {
     onUpdate?.call(controller);
-  }
-
-  @override
-  @mustCallSuper
-  void notifyUpdateCompleted() {
-    _wasChanged = false;
   }
 
   @override
@@ -197,12 +175,13 @@ class AnimationMember extends BuildableViewModelMember {
 
   @override
   DiagnosticsNode toDiagnosticsNode() => DoubleProperty(
-        debugName,
-        _controller?.value,
-        ifNull: '<non ready>',
-        tooltip: 'Animation ${_controller?.lowerBound} -> '
-            '${_controller?.upperBound}',
-      );
+    debugName,
+    _controller?.value,
+    ifNull: '<non ready>',
+    tooltip:
+        'Animation ${_controller?.lowerBound} -> '
+        '${_controller?.upperBound}',
+  );
 }
 
 typedef FocusNodeUpdater = void Function(FocusNode node);
@@ -210,11 +189,8 @@ typedef FocusNodeUpdater = void Function(FocusNode node);
 /// A member that allows the ViewModel to work with a [FocusNode].
 ///
 /// Changes to the [FocusNode] are tracked by this member.
-class FocusMember extends BuildableViewModelMember {
-  FocusMember({
-    this.onUpdate,
-    super.debugName,
-  });
+class FocusMember extends BuildableViewModelMember with ChangeTracker {
+  FocusMember({this.onUpdate, super.debugName});
 
   /// A function that allows interaction with a [FocusNode] during the [update] call.
   ///
@@ -228,10 +204,7 @@ class FocusMember extends BuildableViewModelMember {
   /// calls to [FocusNode.dispose] are not necessary.
   FocusNode get node {
     final node = _node;
-    assert(
-      node is FocusNode,
-      'ViewModel should be initialized first',
-    );
+    assert(node is FocusNode, 'ViewModel should be initialized first');
 
     return node!;
   }
@@ -241,17 +214,13 @@ class FocusMember extends BuildableViewModelMember {
   @override
   void init(ViewModelOwner owner) {
     super.init(owner);
-    _node = FocusNode();
+    final node = _node = FocusNode();
+    node.addListener(notifyChanged);
   }
 
   @override
   void update() {
     onUpdate?.call(node);
-  }
-
-  @override
-  void notifyUpdateCompleted() {
-    // Intentionally left blank
   }
 
   @override
@@ -269,16 +238,14 @@ class FocusMember extends BuildableViewModelMember {
   void removeListener(VoidCallback listener) => node.removeListener(listener);
 
   @override
-  DiagnosticsNode toDiagnosticsNode() => StringProperty(
-        debugName,
-        node.hasFocus ? 'focused' : 'not focused',
-      );
+  DiagnosticsNode toDiagnosticsNode() =>
+      StringProperty(debugName, node.hasFocus ? 'focused' : 'not focused');
 }
 
 /// A member that allows the ViewModel to work with a [TabController].
 ///
 /// Changes to the [TabController] are tracked by this member.
-class TabMember extends BuildableViewModelMember {
+class TabMember extends BuildableViewModelMember with ChangeTracker {
   TabMember({
     required this.initController,
     this.updateController,
@@ -313,13 +280,7 @@ class TabMember extends BuildableViewModelMember {
     return controller!;
   }
 
-  /// {@macro view_model_member.wasChanged}
-  @nonVirtual
-  bool get wasChanged => _wasChanged;
-
   TabController? _controller;
-
-  bool _wasChanged = false;
 
   final List<VoidCallback> _listeners = [];
 
@@ -328,18 +289,13 @@ class TabMember extends BuildableViewModelMember {
     super.init(owner);
 
     _controller = initController();
-    addListener(() => _wasChanged = true);
+    addListener(notifyChanged);
   }
 
   @override
   void addListener(VoidCallback listener) {
     _listeners.add(listener);
     controller.addListener(listener);
-  }
-
-  @override
-  void notifyUpdateCompleted() {
-    _wasChanged = false;
   }
 
   @override
@@ -379,10 +335,10 @@ class TabMember extends BuildableViewModelMember {
 
   @override
   DiagnosticsNode toDiagnosticsNode() => StringProperty(
-        debugName,
-        _controller?.length.toString() ?? '<non ready>',
-        tooltip: 'TabController length: ${_controller?.length}',
-      );
+    debugName,
+    _controller?.length.toString() ?? '<non ready>',
+    tooltip: 'TabController length: ${_controller?.length}',
+  );
 }
 
 /// A member that allows the ViewModel to work with an arbitrary
@@ -390,19 +346,11 @@ class TabMember extends BuildableViewModelMember {
 ///
 /// Calls to [ChangeNotifier.notifyListeners] are tracked by this member.
 class CustomChangeNotifierMember<N extends ChangeNotifier>
-    extends BuildableViewModelMember {
-  CustomChangeNotifierMember(
-    this.initNotifier, {
-    super.debugName,
-  });
+    extends BuildableViewModelMember
+    with ChangeTracker {
+  CustomChangeNotifierMember(this.initNotifier, {super.debugName});
 
   final MemberInitializer<N> initNotifier;
-
-  bool _wasChanged = false;
-
-  /// {@macro view_model_member.wasChanged}
-  @nonVirtual
-  bool get wasChanged => _wasChanged;
 
   /// [ChangeNotifier], accessible both within the ViewModel and from widgets.
   ///
@@ -410,10 +358,7 @@ class CustomChangeNotifierMember<N extends ChangeNotifier>
   /// so manual calls to [ChangeNotifier.dispose] are discouraged.
   N get notifier {
     final notifier = _notifier;
-    assert(
-      notifier != null,
-      'ViewModel should be initialized first',
-    );
+    assert(notifier != null, 'ViewModel should be initialized first');
 
     return notifier!;
   }
@@ -424,25 +369,24 @@ class CustomChangeNotifierMember<N extends ChangeNotifier>
   void init(ViewModelOwner owner) {
     super.init(owner);
 
-    _notifier = initNotifier();
-    _notifier!.addListener(() => _wasChanged = true);
+    final notifier = _notifier = initNotifier();
+    notifier.addListener(notifyChanged);
   }
 
   @override
-  void update() {}
-
-  @override
-  @mustCallSuper
-  void notifyUpdateCompleted() {
-    _wasChanged = false;
+  void update() {
+    // Intentionally left blank
   }
 
   @override
-  void addListener(VoidCallback listener) => notifier.addListener(listener);
+  void addListener(VoidCallback listener) {
+    notifier.addListener(listener);
+  }
 
   @override
-  void removeListener(VoidCallback listener) =>
-      notifier.removeListener(listener);
+  void removeListener(VoidCallback listener) {
+    notifier.removeListener(listener);
+  }
 
   @override
   void dispose() {
@@ -454,7 +398,7 @@ class CustomChangeNotifierMember<N extends ChangeNotifier>
 
   @override
   DiagnosticsNode toDiagnosticsNode() => StringProperty(
-        debugName,
-        _notifier != null ? _notifier.toString() : '<non ready>',
-      );
+    debugName,
+    _notifier != null ? _notifier.toString() : '<non ready>',
+  );
 }
