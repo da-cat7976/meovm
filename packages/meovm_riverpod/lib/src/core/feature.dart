@@ -12,6 +12,11 @@ class RiverpodViewModelOwnerFeature implements ViewModelOwnerFeature {
   }
 
   @override
+  void didChangeDependencies() {
+    // Intentionally left blank
+  }
+
+  @override
   void didUpdateWidget() {
     // Intentionally left blank
   }

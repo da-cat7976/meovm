@@ -17,6 +17,8 @@ abstract interface class ViewModelOwner<Param extends ViewModelParameter?>
 abstract interface class ViewModelOwnerFeature {
   void init();
 
+  void didChangeDependencies();
+
   void didUpdateWidget();
 
   void dispose();
