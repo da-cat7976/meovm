@@ -17,6 +17,7 @@ abstract class BuildableViewModelMember extends ViewModelMember {
 abstract class UpdateNotifierMember<T> extends BuildableViewModelMember
     with ChangeNotifier, FreezableDataMixin<T> {
   UpdateNotifierMember({super.debugName, bool frozen = false}) {
+    /// ? Note that this will be unsafe, if data will be set before this
     this.frozen = frozen;
   }
 
