@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:meovm/src/core/api.dart';
+import 'package:meovm/src/core/feature.dart';
 
 typedef ViewModelFactory<
   VM extends ViewModelLifecycle<Param>,
@@ -57,6 +58,10 @@ mixin ViewModelDispatcherStateBase<
 
     _features = features;
     for (final feature in _features) {
+      if(feature is StateDependentVmOwnerFeature) {
+        feature.bind(this);
+      }
+
       feature.init();
     }
 
