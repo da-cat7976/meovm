@@ -1,10 +1,18 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meovm/meovm.dart';
+import 'package:meovm_riverpod/meovm_riverpod.dart';
 
-class RiverpodViewModelOwnerFeature implements ViewModelOwnerFeature {
-  final WidgetRef Function() ref;
-
-  const RiverpodViewModelOwnerFeature({required this.ref});
+class RiverpodViewModelOwnerFeature
+    extends
+        StateDependentVmOwnerFeature<
+          RiverpodVmDispatcherState<
+            ViewModel<ViewModelParameter?>,
+            ViewModelParameter?
+          >,
+          ViewModel,
+          ViewModelParameter?
+        > {
+  WidgetRef get ref => state.ref;
 
   @override
   void init() {
@@ -20,17 +28,12 @@ class RiverpodViewModelOwnerFeature implements ViewModelOwnerFeature {
   void didUpdateWidget() {
     // Intentionally left blank
   }
-
-  @override
-  void dispose() {
-    // Intentionally left blank
-  }
 }
 
 extension VmOwnerWidgetRef<Param extends ViewModelParameter?>
     on ViewModelOwner<Param> {
   WidgetRef get ref {
     final feature = getFeature<RiverpodViewModelOwnerFeature>();
-    return feature.ref();
+    return feature.ref;
   }
 }
