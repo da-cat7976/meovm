@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:meovm/src/members/common.dart';
-import 'package:meovm/src/members/freeze.dart';
+import 'package:meovm/src/members/utils.dart';
 
 typedef StreamMemberResolver<T> = Stream<T> Function();
 
@@ -12,7 +12,7 @@ typedef StreamMemberErrorListener =
 typedef StreamMemberDoneListener = void Function();
 
 abstract class StreamMemberBase<T> extends BuildableViewModelMember
-    with ChangeNotifier, FreezableDataMixin<T> {
+    with ChangeNotifier, FreezableDataMixin<T>, NotifierChangeTracker {
   @visibleForOverriding
   StreamMemberErrorListener? get onError => null;
 
@@ -20,16 +20,11 @@ abstract class StreamMemberBase<T> extends BuildableViewModelMember
   bool get cancelOnError => false;
 
   @nonVirtual
-  bool get wasChanged => _wasChanged;
-
-  @nonVirtual
   bool get isActive => _subscription != null;
 
   Stream<T>? _stream;
 
   StreamSubscription<T>? _subscription;
-
-  bool _wasChanged = false;
 
   @protected
   Stream<T> resolve();
@@ -51,12 +46,6 @@ abstract class StreamMemberBase<T> extends BuildableViewModelMember
   }
 
   @protected
-  void notifyChanged() {
-    _wasChanged = true;
-    notifyListeners();
-  }
-
-  @protected
   @mustCallSuper
   void onEvent(T event) {
     final current = dataOrNull;
@@ -71,12 +60,6 @@ abstract class StreamMemberBase<T> extends BuildableViewModelMember
   void onDone() {
     _subscription?.cancel();
     _stream = _subscription = null;
-  }
-
-  @override
-  @mustCallSuper
-  void notifyUpdateCompleted() {
-    _wasChanged = false;
   }
 
   @override

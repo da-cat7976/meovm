@@ -3,6 +3,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:meovm/src/core/view_model.dart';
+import 'package:meovm/src/members/utils.dart';
 import 'package:meovm/src/members/value.dart';
 
 /// Member that allows controlling navigation from the ViewModel.
@@ -148,7 +149,7 @@ class NavigationMember<T> extends ValueMember<T> {
 ///  }
 /// }
 /// ```
-class ModalFlowMember<Result> extends ViewModelMember with ChangeNotifier {
+class ModalFlowMember<Result> extends ViewModelMember with ChangeNotifier, NotifierChangeTracker {
   ModalFlowMember({
     super.debugName,
   });
@@ -176,27 +177,15 @@ class ModalFlowMember<Result> extends ViewModelMember with ChangeNotifier {
   @nonVirtual
   bool get shouldCloseModal => _shouldCloseModal;
 
-  /// {@macro view_model_member.wasChanged}
-  @nonVirtual
-  bool get wasChanged => _wasChanged;
-
   Result? _result;
 
   Completer<Result?>? _completer;
 
   bool _shouldCloseModal = false;
 
-  bool _wasChanged = false;
-
   @override
   void update() {
     // Intentionally left blank
-  }
-
-  @override
-  @mustCallSuper
-  void notifyUpdateCompleted() {
-    _wasChanged = false;
   }
 
   /// Requests the opening of a modal window. Returns a Future with the result
@@ -228,9 +217,8 @@ class ModalFlowMember<Result> extends ViewModelMember with ChangeNotifier {
     _result = result;
     _completer = null;
     _shouldCloseModal = false;
-    _wasChanged = true;
 
-    notifyListeners();
+    notifyChanged();
   }
 
   /// Resets the member's state, closing the modal window if it was requested.

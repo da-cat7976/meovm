@@ -3,9 +3,9 @@ import 'dart:math';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:meovm/src/members/common.dart';
+import 'package:meovm/src/members/utils.dart';
 
 typedef ValueMemberResolver<T> = T Function(T? data);
-
 
 /// A member that implements data storage and change. For passing data to
 /// widgets, it is recommended to use this class specifically:
@@ -36,7 +36,8 @@ typedef ValueMemberResolver<T> = T Function(T? data);
 /// ```
 ///
 /// Note: for list handling, it is recommended to use [ListMember].
-class ValueMember<T> extends BuildableViewModelMember with ChangeNotifier {
+class ValueMember<T> extends BuildableViewModelMember
+    with ChangeNotifier, NotifierChangeTracker {
   /// Creates a new member that stores a value of type [T].
   ///
   /// [initial] - the initial value
@@ -45,12 +46,9 @@ class ValueMember<T> extends BuildableViewModelMember with ChangeNotifier {
   ///
   /// Note that if both [initial] and [resolver] are provided, after the first
   /// update, the value will be the one returned by [resolver].
-  ValueMember({
-    T? initial,
-    ValueMemberResolver<T>? resolver,
-    super.debugName,
-  })  : _resolver = resolver,
-        _data = initial;
+  ValueMember({T? initial, ValueMemberResolver<T>? resolver, super.debugName})
+    : _resolver = resolver,
+      _data = initial;
 
   /// The data stored in this member.
   ///
@@ -67,38 +65,24 @@ class ValueMember<T> extends BuildableViewModelMember with ChangeNotifier {
     if (_data == value) return;
 
     _data = value;
-    _wasChanged = true;
-    notifyListeners();
+    notifyChanged();
   }
-
-  /// {@macro view_model_member.wasChanged}
-  @nonVirtual
-  bool get wasChanged => _wasChanged;
 
   final ValueMemberResolver<T>? _resolver;
 
   T? _data;
 
-  bool _wasChanged = false;
-
   @override
   @mustCallSuper
   void update() {
     final resolver = _resolver;
-    if(resolver is! ValueMemberResolver<T>) return;
+    if (resolver is! ValueMemberResolver<T>) return;
 
     final data = resolver(_data);
     if (_data == data) return;
 
     _data = data;
-    _wasChanged = true;
-    notifyListeners();
-  }
-
-  @override
-  @mustCallSuper
-  void notifyUpdateCompleted() {
-    _wasChanged = false;
+    notifyChanged();
   }
 
   @override
@@ -110,11 +94,11 @@ class ValueMember<T> extends BuildableViewModelMember with ChangeNotifier {
 
   @override
   DiagnosticsNode toDiagnosticsNode() => StringProperty(
-        debugName,
-        _data?.toString() ?? '<non ready>',
-        quoted: false,
-        description: 'Member that holds a value',
-      );
+    debugName,
+    _data?.toString() ?? '<non ready>',
+    quoted: false,
+    description: 'Member that holds a value',
+  );
 }
 
 /// A member that implements data storage and change of a list. For passing
@@ -152,7 +136,8 @@ class ValueMember<T> extends BuildableViewModelMember with ChangeNotifier {
 ///     );
 ///   }
 /// }
-class ListMember<T> extends BuildableViewModelMember with ChangeNotifier {
+class ListMember<T> extends BuildableViewModelMember
+    with ChangeNotifier, NotifierChangeTracker {
   /// Creates a new member that holds a list of values of type [T].
   ///
   /// [initial] — the initial value
@@ -165,8 +150,8 @@ class ListMember<T> extends BuildableViewModelMember with ChangeNotifier {
     List<T>? initial,
     ValueMemberResolver<List<T>>? resolver,
     super.debugName,
-  })  : _resolver = resolver,
-        _data = initial ?? [];
+  }) : _resolver = resolver,
+       _data = initial ?? [];
 
   /// The data stored in this member.
   ///
@@ -178,15 +163,9 @@ class ListMember<T> extends BuildableViewModelMember with ChangeNotifier {
     return UnmodifiableListView(data!);
   }
 
-  /// {@macro view_model_member.wasChanged}
-  @nonVirtual
-  bool get wasChanged => _wasChanged;
-
   final ValueMemberResolver<List<T>>? _resolver;
 
   List<T>? _data;
-
-  bool _wasChanged = false;
 
   @override
   @mustCallSuper
@@ -196,14 +175,7 @@ class ListMember<T> extends BuildableViewModelMember with ChangeNotifier {
     if (oldData.equals(newData)) return;
 
     _data = newData;
-    _wasChanged = true;
-    notifyListeners();
-  }
-
-  @override
-  @mustCallSuper
-  void notifyUpdateCompleted() {
-    _wasChanged = false;
+    notifyChanged();
   }
 
   @override
@@ -216,138 +188,118 @@ class ListMember<T> extends BuildableViewModelMember with ChangeNotifier {
   @mustCallSuper
   void add(T element) {
     _data?.add(element);
-    _wasChanged = true;
-    notifyListeners();
+    notifyChanged();
   }
 
   @mustCallSuper
   void addAll(Iterable<T> elements) {
     _data?.addAll(elements);
-    _wasChanged = true;
-    notifyListeners();
+    notifyChanged();
   }
 
   @mustCallSuper
   void sort([int Function(T a, T b)? compare]) {
     _data?.sort(compare);
-    _wasChanged = true;
-    notifyListeners();
+    notifyChanged();
   }
 
   @mustCallSuper
   void shuffle([Random? random]) {
     _data?.shuffle(random);
-    _wasChanged = true;
-    notifyListeners();
+    notifyChanged();
   }
 
   @mustCallSuper
   void clear() {
     _data?.clear();
-    _wasChanged = true;
-    notifyListeners();
+    notifyChanged();
   }
 
   @mustCallSuper
   void insert(int index, T element) {
     _data?.insert(index, element);
-    _wasChanged = true;
-    notifyListeners();
+    notifyChanged();
   }
 
   @mustCallSuper
   void insertAll(int index, Iterable<T> elements) {
     _data?.insertAll(index, elements);
-    _wasChanged = true;
-    notifyListeners();
+    notifyChanged();
   }
 
   @mustCallSuper
   void setAll(int index, Iterable<T> elements) {
     _data?.setAll(index, elements);
-    _wasChanged = true;
-    notifyListeners();
+    notifyChanged();
   }
 
   @mustCallSuper
   void remove(T element) {
     _data?.remove(element);
-    _wasChanged = true;
-    notifyListeners();
+    notifyChanged();
   }
 
   @mustCallSuper
   void removeAt(int index) {
     _data?.removeAt(index);
-    _wasChanged = true;
-    notifyListeners();
+    notifyChanged();
   }
 
   @mustCallSuper
   void removeLast() {
     _data?.removeLast();
-    _wasChanged = true;
-    notifyListeners();
+    notifyChanged();
   }
 
   @mustCallSuper
   void removeWhere(bool Function(T element) test) {
     _data?.removeWhere(test);
-    _wasChanged = true;
-    notifyListeners();
+    notifyChanged();
   }
 
   @mustCallSuper
   void retainWhere(bool Function(T element) test) {
     _data?.retainWhere(test);
-    _wasChanged = true;
-    notifyListeners();
+    notifyChanged();
   }
 
   @mustCallSuper
   void setRange(int start, int end, Iterable<T> iterable, [int skipCount = 0]) {
     _data?.setRange(start, end, iterable, skipCount);
-    _wasChanged = true;
-    notifyListeners();
+    notifyChanged();
   }
 
   @mustCallSuper
   void removeRange(int start, int end) {
     _data?.removeRange(start, end);
-    _wasChanged = true;
-    notifyListeners();
+    notifyChanged();
   }
 
   @mustCallSuper
   void fillRange(int start, int end, [T? fillValue]) {
     _data?.fillRange(start, end, fillValue);
-    _wasChanged = true;
-    notifyListeners();
+    notifyChanged();
   }
 
   @mustCallSuper
   void replaceRange(int start, int end, Iterable<T> newContents) {
     _data?.replaceRange(start, end, newContents);
-    _wasChanged = true;
-    notifyListeners();
+    notifyChanged();
   }
 
   @mustCallSuper
   void operator []=(int index, T value) {
     _data?[index] = value;
-    _wasChanged = true;
-    notifyListeners();
+    notifyChanged();
   }
 
   @override
-  DiagnosticsNode toDiagnosticsNode() => IterableProperty(
-        debugName,
-        _data,
-        ifNull: '<non ready>',
-      );
+  DiagnosticsNode toDiagnosticsNode() =>
+      IterableProperty(debugName, _data, ifNull: '<non ready>');
 }
 
-class SetMember<T> extends BuildableViewModelMember with ChangeNotifier {
+class SetMember<T> extends BuildableViewModelMember
+    with ChangeNotifier, NotifierChangeTracker {
   /// Creates a new member that stores a set of values of type [T].
   ///
   /// [initial] — the initial value
@@ -360,8 +312,8 @@ class SetMember<T> extends BuildableViewModelMember with ChangeNotifier {
     Set<T>? initial,
     ValueMemberResolver<Set<T>>? resolver,
     super.debugName,
-  })  : _resolver = resolver,
-        _data = initial ?? {};
+  }) : _resolver = resolver,
+       _data = initial ?? {};
 
   /// The data stored in this member.
   ///
@@ -377,12 +329,6 @@ class SetMember<T> extends BuildableViewModelMember with ChangeNotifier {
 
   Set<T>? _data;
 
-  /// {@macro view_model_member.wasChanged}
-  @nonVirtual
-  bool get wasChanged => _wasChanged;
-
-  bool _wasChanged = false;
-
   @override
   @mustCallSuper
   void update() {
@@ -391,8 +337,7 @@ class SetMember<T> extends BuildableViewModelMember with ChangeNotifier {
     if (setEquals(oldData, newData)) return;
 
     _data = newData;
-    _wasChanged = true;
-    notifyListeners();
+    notifyChanged();
   }
 
   @override
@@ -405,61 +350,46 @@ class SetMember<T> extends BuildableViewModelMember with ChangeNotifier {
   @mustCallSuper
   void add(T element) {
     _data?.add(element);
-    _wasChanged = true;
-    notifyListeners();
+    notifyChanged();
   }
 
   @mustCallSuper
   void addAll(Iterable<T> elements) {
     _data?.addAll(elements);
-    _wasChanged = true;
-    notifyListeners();
+    notifyChanged();
   }
 
   @mustCallSuper
   void clear() {
     _data?.clear();
-    _wasChanged = true;
-    notifyListeners();
+    notifyChanged();
   }
 
   @mustCallSuper
   void remove(T element) {
     _data?.remove(element);
-    _wasChanged = true;
-    notifyListeners();
+    notifyChanged();
   }
 
   @mustCallSuper
   void removeWhere(bool Function(T element) test) {
     _data?.removeWhere(test);
-    _wasChanged = true;
-    notifyListeners();
+    notifyChanged();
   }
 
   @mustCallSuper
   void retainWhere(bool Function(T element) test) {
     _data?.retainWhere(test);
-    _wasChanged = true;
-    notifyListeners();
+    notifyChanged();
   }
 
   @mustCallSuper
   void removeAll(Iterable<T?> elements) {
     _data?.removeAll(elements);
-    _wasChanged = true;
-    notifyListeners();
+    notifyChanged();
   }
 
   @override
-  DiagnosticsNode toDiagnosticsNode() => IterableProperty(
-        debugName,
-        _data,
-        ifNull: '<non ready>',
-      );
-
-  @override
-  void notifyUpdateCompleted() {
-    _wasChanged = false;
-  }
+  DiagnosticsNode toDiagnosticsNode() =>
+      IterableProperty(debugName, _data, ifNull: '<non ready>');
 }

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/cupertino.dart';
 import 'package:meovm/src/core/view_model.dart';
 import 'package:meta/meta.dart';
 
@@ -88,5 +89,53 @@ mixin FreezableDataMixin<T> on ViewModelMember {
   void dispose() {
     _data = _skippedData = null;
     super.dispose();
+  }
+}
+
+mixin ChangeTracker on ViewModelMember {
+  /// {@macro view_model_member.wasChanged}
+  bool get wasChanged => _wasChanged;
+
+  bool _wasChanged = false;
+
+  @mustCallSuper
+  void notifyChanged() {
+    _wasChanged = true;
+  }
+
+  @override
+  @mustCallSuper
+  void notifyUpdateCompleted() {
+    _wasChanged = false;
+    super.notifyUpdateCompleted();
+  }
+}
+
+mixin NotifierChangeTracker on ViewModelMember, ChangeNotifier {
+  /// {@template view_model_member.wasChanged}
+  ///
+  /// Were the member's data changed during the ViewModel update process.
+  ///
+  /// Can be `true` only during the entire ViewModel update, to which the member
+  /// belongs, or the partial update according to dependencies.
+  ///
+  /// Not intended for use outside ViewModel.
+  ///
+  /// {@endtemplate}
+  bool get wasChanged => _wasChanged;
+
+  bool _wasChanged = false;
+
+  @mustCallSuper
+  void notifyChanged() {
+    _wasChanged = true;
+    notifyListeners();
+  }
+
+  @override
+  @mustCallSuper
+  void notifyUpdateCompleted() {
+    _wasChanged = false;
+    super.notifyUpdateCompleted();
   }
 }

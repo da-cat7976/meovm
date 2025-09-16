@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:meovm/src/core/view_model.dart';
-import 'package:meovm/src/members/freeze.dart';
+import 'package:meovm/src/members/utils.dart';
 
 /// Base class for all ViewModel members, on which it is allowed to build widgets.
 ///
@@ -15,26 +15,11 @@ abstract class BuildableViewModelMember extends ViewModelMember {
 /// This class implements the freezing update function, which allows you to
 /// temporarily ignore data changes, while still preserving them for later use.
 abstract class UpdateNotifierMember<T> extends BuildableViewModelMember
-    with ChangeNotifier, FreezableDataMixin<T> {
+    with ChangeNotifier, FreezableDataMixin<T>, NotifierChangeTracker {
   UpdateNotifierMember({super.debugName, bool frozen = false}) {
     /// ? Note that this will be unsafe, if data will be set before this
     this.frozen = frozen;
   }
-
-  /// {@template view_model_member.wasChanged}
-  ///
-  /// Were the member's data changed during the ViewModel update process.
-  ///
-  /// Can be `true` only during the entire ViewModel update, to which the member
-  /// belongs, or the partial update according to dependencies.
-  ///
-  /// Not intended for use outside ViewModel.
-  ///
-  /// {@endtemplate}
-  @nonVirtual
-  bool get wasChanged => _wasChanged;
-
-  bool _wasChanged = false;
 
   @override
   @mustCallSuper
@@ -43,8 +28,7 @@ abstract class UpdateNotifierMember<T> extends BuildableViewModelMember
     final updated = updateData(resolve(current));
     if (updated == current) return;
 
-    _wasChanged = true;
-    notifyListeners();
+    notifyChanged();
   }
 
   @override
@@ -56,14 +40,7 @@ abstract class UpdateNotifierMember<T> extends BuildableViewModelMember
     final maybeSkipped = dataOrNull;
     if (maybeSkipped == current) return;
 
-    _wasChanged = true;
-    notifyListeners();
-  }
-
-  @override
-  @mustCallSuper
-  void notifyUpdateCompleted() {
-    _wasChanged = false;
+    notifyChanged();
   }
 
   /// Updates the data stored by the member.
