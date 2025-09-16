@@ -74,6 +74,7 @@ mixin FreezableDataMixin<T> on ViewModelMember {
   /// // code from action body
   /// someMember.unfreeze();
   /// ```
+  @nonVirtual
   Future<R> doFrozen<R>(FutureOr<R> Function() action) async {
     frozen = true;
     final result = await action();
@@ -83,6 +84,7 @@ mixin FreezableDataMixin<T> on ViewModelMember {
   }
 
   @override
+  @mustCallSuper
   void dispose() {
     _data = _skippedData = null;
     super.dispose();
