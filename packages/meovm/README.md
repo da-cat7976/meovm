@@ -5,8 +5,7 @@ A lightweight MVVM framework for Flutter that provides:
 - Declarative dependencies between members with topological ordering
 - Built-in members for values, lists, sets, streams, and common Flutter controllers
 - Hook-based utilities for ergonomic consumption in widgets
-- Integrations for [flutter_bloc](https://pub.dev/packages/flutter_bloc)
-  and [riverpod](https://pub.dev/packages/riverpod)
+- Integrations for [flutter_bloc](https://pub.dev/packages/flutter_bloc) and [riverpod](https://pub.dev/packages/riverpod)
 - Code generation for VMs & params
 
 ## Installation
@@ -16,7 +15,7 @@ Add to your pubspec.yaml:
 ```yaml
 dependencies:
   meovm: ^1.0.0
-  meovm_api: ^1.0.0
+  meovm_api: ^1.0.0   # Optional. Add if you're using codegen
   flutter_hooks: ^0.21.3+1
 ```
 
@@ -25,7 +24,7 @@ OR, if you're using [riverpod](https://pub.dev/packages/riverpod) as state manag
 ```yaml
 dependencies:
   meovm: ^1.0.0
-  meovm_api: ^1.0.0
+  meovm_api: ^1.0.0    # Optional. Add if you're using codegen
   meovm_riverpod: ^1.0.0
   flutter_hooks: ^0.21.3+1
 ```
@@ -35,7 +34,7 @@ OR, if you're using [flutter_bloc](https://pub.dev/packages/flutter_bloc) as sta
 ```yaml
 dependencies:
   meovm: ^1.0.0
-  meovm_api: ^1.0.0
+  meovm_api: ^1.0.0    # Optional. Add if you're using codegen
   meovm_bloc: ^1.0.0
   flutter_hooks: ^0.21.3+1
 ```
@@ -51,33 +50,28 @@ dev_dependencies:
 ## Core concepts
 
 - ViewModel
-    - Implements the MVVM state holder and lifecycle: init, update, updateDependencies, dispose.
-    - Manages a list of members and their dependencies, ensuring topological initialization,
-      updates, and disposal.
+    - Implements the MVVM state holder and lifecycle
+    - Manages a list of members and their dependencies, ensuring topological initialization, updates, and disposal.
     - Provides owner (the Flutter-side host) and param (configuration/state passed from the widget).
 - ViewModelDispatcher
-    - The ViewModelDispatcher widget (as well as corresponding dispatchers from meovm_bloc &
-      meovm_riverpod) instantiates your ViewModel, wires lifecycle methods, provides param, and
-      exposes the ViewModel to the widget tree via Inherited widgets.
+    - The ViewModelDispatcher widget (as well as corresponding dispatchers from meovm_bloc & meovm_riverpod) instantiates your ViewModel, wires lifecycle methods, provides param, and exposes the ViewModel to the widget tree via Inherited widgets.
 - Members
     - Encapsulated state units that are Listenable and can build widgets or notify changes.
     - Built-in members:
         - ValueMember, ListMember, SetMember
         - StreamMember
         - Navigation and modal flow helpers: NavigationMember, ModalFlowMember
-        - Flutter-oriented members: EditableTextMember, AnimationMember, FocusMember, TabMember,
-          CustomChangeNotifierMember
-    - Members can be composed and can depend on each other. Dependencies let the framework update
-      only affected parts of the UI in the right order.
+        - Flutter-oriented members: EditableTextMember, AnimationMember, FocusMember, TabMember, CustomChangeNotifierMember
+    - Members can be composed and can depend on each other. Dependencies let the framework update only affected parts of the UI in the right order.
 - Hooks and builders
     - `.build(...)` to produce a ListenableBuilder from members
     - `.use()` to consume member state in Hook widgets
-    - `NavigationMember.useNavigation(...)` and `ModalFlowMember.useModal(...)` to easily integrate
-      navigation & VM
+    - `NavigationMember.useNavigation(...)` and `ModalFlowMember.useModal(...)` to easily integrate navigation & VM
 
 ## Quick start
 
 1. Define a ViewModel
+
     ```dart
     import 'package:meovm/meovm.dart';
     import 'package:meovm_api/meovm_api.dart';
@@ -101,6 +95,7 @@ dev_dependencies:
     ```
 
 2. Insert it into widget tree
+
     ```dart
     import 'package:flutter/material.dart';
     import 'package:meovm/meovm.dart';
@@ -120,7 +115,9 @@ dev_dependencies:
     ```
 
 3. Consume it in the UI:
+
    Using `.build(...)`:
+   
     ```dart
     class CounterView extends StatelessWidget {
       const CounterView({super.key});
@@ -145,6 +142,7 @@ dev_dependencies:
     ```
 
    Or with hooks and `.use()`:
+   
     ```dart
     import 'package:flutter_hooks/flutter_hooks.dart';
     
