@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meovm/meovm.dart';
-import 'package:meovm_bloc/core/dispatcher.dart';
+import 'package:meovm_bloc/src/core/dispatcher.dart';
 
 class BlocViewModelOwnerFeature
     extends

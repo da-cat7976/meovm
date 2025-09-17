@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meovm/meovm.dart';
-import 'package:meovm_bloc/core/feature.dart';
-import 'package:meovm_bloc/utils/error_handling.dart';
+import 'package:meovm_bloc/src/core/feature.dart';
+import 'package:meovm_bloc/src/utils/error_handling.dart';
 import 'package:meta/meta.dart';
 
 typedef BlocExtractor = B Function<B extends StateStreamable<S>, S>();
@@ -33,6 +33,7 @@ class BlocMember<B extends StateStreamable<S>, S> extends StreamMemberBase<S> {
     required this.resolver,
     StreamMemberErrorListener? onError,
     this.cancelOnError = false,
+    super.debugName,
   }) : _onError = onError;
 
   final BlocResolver<B, S> resolver;

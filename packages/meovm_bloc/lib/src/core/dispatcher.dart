@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:meovm/meovm.dart';
-import 'package:meovm_bloc/core/feature.dart';
+import 'package:meovm_bloc/src/core/feature.dart';
 
 class BlocVmDispatcher<
   VM extends ViewModel<Param>,
