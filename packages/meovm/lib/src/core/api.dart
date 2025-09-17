@@ -1,5 +1,6 @@
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:meovm_api/meovm_api.dart';
 
 /// An interface for the owner of the ViewModel, through which the ViewModel
@@ -8,19 +9,25 @@ abstract interface class ViewModelOwner<Param extends ViewModelParameter?>
     implements TickerProvider {
   Param get param;
 
+  /// Requests a feature from the owner.
+  ///
+  /// Throws [ArgumentError] if the feature is not found.
   F getFeature<F extends ViewModelOwnerFeature>();
 }
 
-// ? Maybe other lifecycle methods of State should be accessible as well?
 /// Base interface for external ViewModel features such as state manager
 /// integration.
 abstract interface class ViewModelOwnerFeature {
+  /// Represents [State.initState].
   void init();
 
+  /// Represents [State.didChangeDependencies].
   void didChangeDependencies();
 
+  /// Represents [State.didUpdateWidget].
   void didUpdateWidget();
 
+  /// Represents [State.dispose].
   void dispose();
 }
 
@@ -53,7 +60,7 @@ abstract interface class ViewModelLifecycle<Param extends ViewModelParameter?>
   void init(ViewModelOwner<Param> owner);
 
   /// Completely updates the ViewModel and its members when the parameters or
-  /// Riverpod provider state changes.
+  /// owner widget rebuilds for other reason.
   ///
   /// Should correspond to [State.didUpdateWidget] and [State.build].
   void update();

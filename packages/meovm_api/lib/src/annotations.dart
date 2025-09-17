@@ -1,10 +1,12 @@
 import 'package:meta/meta_meta.dart';
 
+/// Annotation for VMs and params that use meovm code generation.
 @Target({TargetKind.classType})
 final class Meovm {
   const Meovm();
 }
 
+/// Annotation for manual control of dependencies between VM members.
 @Target({TargetKind.field})
 final class MeovmDepend {
   const MeovmDepend(
@@ -14,12 +16,18 @@ final class MeovmDepend {
     this.disabled = false,
   });
 
+  /// Name of the source member (on which annotated depends).
   final Symbol dependOn;
 
+  /// Name of the VM (in parameter) from which the source member is.
+  ///
+  /// Ignored if [external] equals to `false`.
   final Symbol? from;
 
+  /// Is dependency external? If `true`, source member should be in param.
   final bool external;
 
+  /// Is dependency disabled?
   final bool disabled;
 
   @override

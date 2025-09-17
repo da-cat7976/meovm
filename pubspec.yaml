@@ -10,3 +10,6 @@ workspace:
   - packages/meovm_riverpod
   - packages/meovm_gen_test
   - packages/meovm_bloc
+  - packages/meovm/example
+  - packages/meovm_riverpod/example
+  - packages/meovm_bloc/example

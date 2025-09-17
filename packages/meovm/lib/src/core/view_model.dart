@@ -17,8 +17,8 @@ typedef DisposeListener = void Function(ViewModelMember disposed);
 /// For information on how to integrate ViewModel into the widget tree, see
 /// [ViewModelDispatcher].
 abstract class ViewModel<Param extends ViewModelParameter?>
-    implements ViewModelLifecycle<Param>, ViewModelMemberFactoryAccess {
-  @mustBeOverridden
+    with ViewModelMemberFactoryAccess
+    implements ViewModelLifecycle<Param> {
   @visibleForOverriding
   List<ViewModelMember> get members => [];
 
@@ -277,8 +277,7 @@ abstract class ViewModelMember implements ViewModelMemberBase {
 
   String get debugName => _debugName ?? runtimeType.toString();
 
-  /// State owner of the ViewModel member, providing direct access to
-  /// Riverpod and Flutter.
+  /// State, owner of the ViewModel member, providing access to Flutter.
   ///
   /// This is convenient for implementing members that rely solely on constant
   /// parameters.
@@ -352,15 +351,19 @@ abstract class ViewModelMember implements ViewModelMemberBase {
       StringProperty(debugName, '<unknown>', quoted: false);
 }
 
+// TODO: add codegen support
+@experimental
 abstract class ViewModelDelegate<
   VM extends ViewModel<Param>,
   Param extends ViewModelParameter
->
-    implements ViewModelMemberFactoryAccess {
-  const ViewModelDelegate({required this.owner});
+> with ViewModelMemberFactoryAccess {
+  ViewModelDelegate({required this.owner});
 
   @protected
   final VM owner;
+
+  @override
+  ViewModelState get state => owner.state;
 
   List<ViewModelMemberBase> get members;
 
