@@ -1,6 +1,6 @@
 name: meovm
 description: "A MVVM framework for Flutter"
-version: 0.0.1
+version: 1.0.0
 
 environment:
   sdk: ^3.9.0
