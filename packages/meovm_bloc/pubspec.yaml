@@ -11,7 +11,7 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_bloc: ^9.1.1
-  meovm: ^0.0.1
+  meovm: ^1.0.0
   meta: ^1.17.0
 
 dev_dependencies:
