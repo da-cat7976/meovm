@@ -19,7 +19,6 @@ typedef DisposeListener = void Function(ViewModelMember disposed);
 abstract class ViewModel<Param extends ViewModelParameter?>
     with ViewModelMemberFactoryAccess
     implements ViewModelLifecycle<Param> {
-  @mustBeOverridden
   @visibleForOverriding
   List<ViewModelMember> get members => [];
 
