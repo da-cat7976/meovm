@@ -1,12 +1,10 @@
 A lightweight MVVM framework for Flutter that provides:
-
 - A clear ViewModel lifecycle
 - Fine-grained UI updates via ViewModel members
 - Declarative dependencies between members with topological ordering
 - Built-in members for values, lists, sets, streams, and common Flutter controllers
 - Hook-based utilities for ergonomic consumption in widgets
-- Integrations for [flutter_bloc](https://pub.dev/packages/flutter_bloc)
-  and [riverpod](https://pub.dev/packages/riverpod)
+- Integrations for [flutter_bloc](https://pub.dev/packages/flutter_bloc) and [riverpod](https://pub.dev/packages/riverpod)
 - Code generation for VMs & params
 
 ## Installation
@@ -52,28 +50,22 @@ dev_dependencies:
 
 - ViewModel
     - Implements the MVVM state holder and lifecycle
-    - Manages a list of members and their dependencies, ensuring topological initialization,
-      updates, and disposal.
+    - Manages a list of members and their dependencies, ensuring topological initialization, updates, and disposal.
     - Provides owner (the Flutter-side host) and param (configuration/state passed from the widget).
 - ViewModelDispatcher
-    - The ViewModelDispatcher widget (as well as corresponding dispatchers from meovm_bloc &
-      meovm_riverpod) instantiates your ViewModel, wires lifecycle methods, provides param, and
-      exposes the ViewModel to the widget tree via Inherited widgets.
+    - The ViewModelDispatcher widget (as well as corresponding dispatchers from meovm_bloc & meovm_riverpod) instantiates your ViewModel, wires lifecycle methods, provides param, and exposes the ViewModel to the widget tree via Inherited widgets.
 - Members
     - Encapsulated state units that are Listenable and can build widgets or notify changes.
     - Built-in members:
         - ValueMember, ListMember, SetMember
         - StreamMember
         - Navigation and modal flow helpers: NavigationMember, ModalFlowMember
-        - Flutter-oriented members: EditableTextMember, AnimationMember, FocusMember, TabMember,
-          CustomChangeNotifierMember
-    - Members can be composed and can depend on each other. Dependencies let the framework update
-      only affected parts of the UI in the right order.
+        - Flutter-oriented members: EditableTextMember, AnimationMember, FocusMember, TabMember, CustomChangeNotifierMember
+    - Members can be composed and can depend on each other. Dependencies let the framework update only affected parts of the UI in the right order.
 - Hooks and builders
     - `.build(...)` to produce a ListenableBuilder from members
     - `.use()` to consume member state in Hook widgets
-    - `NavigationMember.useNavigation(...)` and `ModalFlowMember.useModal(...)` to easily integrate
-      navigation & VM
+    - `NavigationMember.useNavigation(...)` and `ModalFlowMember.useModal(...)` to easily integrate navigation & VM
 
 ## Quick start
 
@@ -124,7 +116,7 @@ dev_dependencies:
 3. Consume it in the UI:
 
    Using `.build(...)`:
-
+   
     ```dart
     class CounterView extends StatelessWidget {
       const CounterView({super.key});
@@ -149,7 +141,7 @@ dev_dependencies:
     ```
 
    Or with hooks and `.use()`:
-
+   
     ```dart
     import 'package:flutter_hooks/flutter_hooks.dart';
     
@@ -294,7 +286,6 @@ final paramOrNull = context.useParamOrNull<MyParam>();
 ```
 
 ## Diagnostics
-
 All ViewModels and members implement rich diagnostics for Flutter DevTools via:
 
 - ViewModel prints current state and member list with dependencies

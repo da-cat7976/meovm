@@ -1,3 +1,7 @@
+Side package for [meovm](https://pub.dev/packages/meovm). Adds high-level API for code generation.
+
+# Meovm
+
 A lightweight MVVM framework for Flutter that provides:
 
 - A clear ViewModel lifecycle

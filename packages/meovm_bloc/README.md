@@ -1,3 +1,8 @@
+Side package for [meovm](https://pub.dev/packages/meovm). Provides integration
+with [flutter_bloc](https://pub.dev/packages/flutter_bloc).
+
+# Meovm
+
 A lightweight MVVM framework for Flutter that provides:
 
 - A clear ViewModel lifecycle
