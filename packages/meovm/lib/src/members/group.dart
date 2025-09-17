@@ -1,11 +1,15 @@
 import 'package:flutter/foundation.dart';
 import 'package:meovm/src/core/api.dart';
 import 'package:meovm/src/core/view_model.dart';
+import 'package:meta/meta.dart';
 
 typedef GroupMemberBuilder<K, M extends ViewModelMember> = M Function(
   K key,
 );
 
+/// A member that groups multiple similar members. Useful when you have
+/// a large enum for all of which entries should be added appropriate member.
+@experimental
 class MemberGroup<K, M extends ViewModelMember> extends ViewModelMember
     with ChangeNotifier {
   MemberGroup({

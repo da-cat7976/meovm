@@ -137,6 +137,35 @@ class ViewModelMemberFactory {
   ModalFlowMember<T> modalFlow<T>({String? debugName}) => ModalFlowMember<T>(
     debugName: debugName ?? 'ModalFlowMember #${nextId()}',
   );
+
+  /// Creates a [MemberGroup].
+  @experimental
+  MemberGroup<K, M> memberGroup<K, M extends ViewModelMember>({
+    required List<K> keys,
+    required GroupMemberBuilder<K, M> builder,
+    List<ViewModelMember>? dependOn,
+    String? debugName,
+  }) => MemberGroup<K, M>(
+    keys: keys,
+    builder: builder,
+    dependOn: dependOn,
+    debugName: debugName ?? 'MemberGroup #${nextId()}',
+  );
+
+  /// Creates a [StreamMember].
+  StreamMember<T> stream<T>({
+    required StreamMemberResolver<T> resolver,
+    StreamMemberErrorListener? onError,
+    bool cancelOnError = false,
+    String? debugName,
+  }) {
+    return StreamMember<T>(
+      resolver: resolver,
+      onError: onError,
+      cancelOnError: cancelOnError,
+      debugName: debugName ?? 'StreamMember #${nextId()}',
+    );
+  }
 }
 
 mixin ViewModelMemberFactoryAccess {

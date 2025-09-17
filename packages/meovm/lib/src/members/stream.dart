@@ -77,7 +77,7 @@ class StreamMember<T> extends StreamMemberBase<T> {
   StreamMember({
     required this.resolver,
     this.onError,
-    required this.cancelOnError,
+    this.cancelOnError = false,
     super.debugName,
   });
 
