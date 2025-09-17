@@ -1,5 +1,4 @@
 A lightweight MVVM framework for Flutter that provides:
-
 - A clear ViewModel lifecycle
 - Fine-grained UI updates via ViewModel members
 - Declarative dependencies between members with topological ordering
