@@ -59,7 +59,7 @@ abstract class RiverpodMember<T> extends UpdateNotifierMember<T> {
 ///     final vm = context.useVM<SomeVm>();
 ///
 ///     return vm.intValue.build(
-///       builder: (context) => Text('Число: ${vm.intValue.data}'),
+///       builder: (context) => Text('${vm.intValue.data}'),
 ///     );
 ///   }
 /// }
@@ -77,7 +77,7 @@ abstract class RiverpodMember<T> extends UpdateNotifierMember<T> {
 ///
 ///     return vm.someValue.build(
 ///       builder: (context) =>
-///         Text('Число: ${vm.someValue.data.valueOrNull?.intValue ?? 0}'),
+///         Text('${vm.someValue.data.valueOrNull?.intValue ?? 0}'),
 ///     );
 ///   }
 /// }

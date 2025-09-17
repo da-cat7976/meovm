@@ -3,11 +3,15 @@ import 'package:flutter/foundation.dart';
 import 'package:meovm/src/core/api.dart';
 import 'package:meovm/src/core/feature.dart';
 
+/// Factory function that creates ViewModel instance. Typically, constructors
+/// of VMs itself.
 typedef ViewModelFactory<
   VM extends ViewModelLifecycle<Param>,
   Param extends ViewModelParameter?
 > = VM Function();
 
+/// Widget mixin for dispatcher implementing. Use it when you need to implement
+/// your own dispatcher widget.
 mixin ViewModelDispatcherBase<
   VM extends ViewModelLifecycle<Param>,
   Param extends ViewModelParameter?
@@ -20,6 +24,8 @@ mixin ViewModelDispatcherBase<
   Widget get child;
 }
 
+/// State mixin for dispatcher implementing. Use it when you need to implement
+/// your own dispatcher.
 mixin ViewModelDispatcherStateBase<
   W extends ViewModelDispatcherBase<VM, Param>,
   VM extends ViewModelLifecycle<Param>,
@@ -27,8 +33,10 @@ mixin ViewModelDispatcherStateBase<
 >
     on State<W>
     implements ViewModelOwner<Param> {
+  /// VM that this dispatcher holds.
   VM get viewModel => _viewModel;
 
+  /// Current parameter passed to VM.
   @override
   Param get param => _param;
 
@@ -36,6 +44,8 @@ mixin ViewModelDispatcherStateBase<
 
   late Param _param;
 
+  /// Additional features of dispatcher that can be used to implement
+  /// members. See [ViewModelOwnerFeature].
   @visibleForOverriding
   List<ViewModelOwnerFeature> get features => [];
 
