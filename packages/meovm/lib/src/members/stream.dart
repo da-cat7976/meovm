@@ -13,6 +13,8 @@ typedef StreamMemberDoneListener = void Function();
 
 abstract class StreamMemberBase<T> extends BuildableViewModelMember
     with ChangeNotifier, FreezableDataMixin<T>, NotifierChangeTracker {
+  StreamMemberBase({super.debugName});
+
   @visibleForOverriding
   StreamMemberErrorListener? get onError => null;
 
@@ -76,6 +78,7 @@ class StreamMember<T> extends StreamMemberBase<T> {
     required this.resolver,
     this.onError,
     required this.cancelOnError,
+    super.debugName,
   });
 
   final StreamMemberResolver<T> resolver;
