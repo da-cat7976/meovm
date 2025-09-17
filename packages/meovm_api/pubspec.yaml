@@ -1,5 +1,5 @@
 name: meovm_api
-description: A starting point for Dart libraries or applications.
+description: "Flutter independent API for meovm — lightweight MVVM framework for Flutter. Built-in dependencies between members, bunch of built-in members for common use cases, and minimum boilerplate approach."
 version: 1.0.0
 # repository: https://github.com/my_org/my_repo
 

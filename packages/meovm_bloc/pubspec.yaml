@@ -1,5 +1,5 @@
 name: meovm_bloc
-description: "A flutter_bloc integration package for meovm"
+description: "A flutter_bloc integration package for meovm — lightweight MVVM framework for Flutter. Built-in dependencies between members, bunch of built-in members for common use cases, and minimum boilerplate approach."
 version: 0.0.1
 
 resolution: workspace
