@@ -277,8 +277,7 @@ abstract class ViewModelMember implements ViewModelMemberBase {
 
   String get debugName => _debugName ?? runtimeType.toString();
 
-  /// State owner of the ViewModel member, providing direct access to
-  /// Riverpod and Flutter.
+  /// State, owner of the ViewModel member, providing access to Flutter.
   ///
   /// This is convenient for implementing members that rely solely on constant
   /// parameters.
