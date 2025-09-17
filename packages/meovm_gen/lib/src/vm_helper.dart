@@ -283,11 +283,20 @@ class VmMixinGeneratorHelper {
     }
   }
 
-  static final _vmChecker = TypeChecker.typeNamed(MeovmAutoVm, inPackage: 'meovm_api');
+  static final _vmChecker = TypeChecker.typeNamed(
+    MeovmAutoVm,
+    inPackage: 'meovm_api',
+  );
 
-  static final _memberChecker = TypeChecker.typeNamed(MeovmAutoVmMember, inPackage: 'meovm_api');
+  static final _memberChecker = TypeChecker.typeNamed(
+    MeovmAutoVmMember,
+    inPackage: 'meovm_api',
+  );
 
-  static final _dependAnnotationChecker = TypeChecker.typeNamed(MeovmDepend, inPackage: 'meovm_api');
+  static final _dependAnnotationChecker = TypeChecker.typeNamed(
+    MeovmDepend,
+    inPackage: 'meovm_api',
+  );
 }
 
 sealed class _DependencyPair {
@@ -412,7 +421,7 @@ class _MemberDependenciesCollector extends RecursiveAstVisitor<void> {
   }
 
   void _checkMethodImplementation(MethodElement2 element) {
-    final declaration = library.getFragmentDeclaration(element.firstFragment);
+    final declaration = _getLibrarySafeDeclaration(element);
     final node = declaration?.node;
 
     if (node is! MethodDeclaration) return;
@@ -429,6 +438,14 @@ class _MemberDependenciesCollector extends RecursiveAstVisitor<void> {
 
     body.visitChildren(subCollector);
     _internal.addAll(subCollector.internalDependencies);
+  }
+
+  FragmentDeclarationResult? _getLibrarySafeDeclaration(Element2 element) {
+    try {
+      return library.getFragmentDeclaration(element.firstFragment);
+    } on ArgumentError {
+      return null;
+    }
   }
 
   Set<FieldElement2> get internalDependencies => Set.unmodifiable(_internal);
