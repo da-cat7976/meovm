@@ -1,9 +1,12 @@
-import 'package:example/vm.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meovm/meovm.dart';
+import 'package:meovm_riverpod/meovm_riverpod.dart';
+
+import 'vm.dart';
 
 void main() {
-  runApp(MeovmExample());
+  runApp(ProviderScope(child: MeovmExample()));
 }
 
 class MeovmExample extends StatelessWidget {
@@ -20,7 +23,7 @@ class Home extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ViewModelDispatcher(
+    return RiverpodVmDispatcher(
       factory: CounterVm.new,
       param: CounterParam(step: 1),
       child: Builder(
