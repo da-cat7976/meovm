@@ -91,7 +91,7 @@ dev_dependencies:
     @Meovm()
     class CounterVm extends ViewModel<CounterParam?> with _$CounterVm {
       @override
-      late final count = ValueMember<int>(initial: 0, debugName: 'count');
+      late final count = member.value<int>(initial: 0, debugName: 'count');
     
       @override
       void increment() => count.data = count.data + 1;
@@ -181,6 +181,12 @@ dev_dependencies:
 
 ## Members in detail
 
+Keep in mind:
+
+1. All members are Listenable and can be used with ListenableBuilder.
+2. All members can be declared directly or via `ViewModel.member` factory (preferred). Refer to
+   `ViewModelFactory` for more details.
+
 - ValueMember
     - Holds a single value. Updates notify listeners only when the value actually changes.
 - ListMember and SetMember
@@ -218,10 +224,10 @@ member in the constructor of member (typically in `resolver`):
 @Meovm()
 class SomeVm extends ViewModel with _$SomeVm {
   @override
-  late final memberA = ValueMember(initial: 0);
+  late final memberA = member.value(initial: 0);
 
   @override
-  late final memberB = ValueMember(
+  late final memberB = member.value(
     resolver: (_) => memberA.data + 1,
   );
 }
@@ -236,7 +242,7 @@ Note that you can use members from other VMs (passed within parameter) as well:
 @Meovm()
 class ExternalVm extends ViewModel with _$ExternalVm {
   @override
-  late final value = ValueMember(initial: 0);
+  late final value = member.value(initial: 0);
 }
 
 @Meovm()
@@ -247,7 +253,7 @@ class SomeParam extends ViewModelParameter with _$SomeParam {
   });
 
   @override
-  final ValueMember<int> externalMember;
+  final member.value<int> externalMember;
 
   @override
   final ExternalVm externalVm;
@@ -256,10 +262,10 @@ class SomeParam extends ViewModelParameter with _$SomeParam {
 @Meovm()
 class SomeVm extends ViewModel<SomeParam> with _$SomeVm {
   @override
-  late final memberA = ValueMember(resolver: (_) => param.externalMember.data + 1);
+  late final memberA = member.value(resolver: (_) => param.externalMember.data + 1);
 
   @override
-  late final memberB = ValueMember(
+  late final memberB = member.value(
     resolver: (_) => param.externalVm.value.data + 1,
   );
 }
@@ -269,9 +275,9 @@ Alternatively, if you're not using codegen, set dependencies manually:
 
 ```dart
 class SomeVm extends ViewModel {
-  late final memberA = ValueMember(initial: 0);
+  late final memberA = member.value(initial: 0);
 
-  late final memberB = ValueMember(
+  late final memberB = member.value(
     resolver: (_) => memberA.data + 1,
   );
 

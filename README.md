@@ -1,10 +1,12 @@
 A lightweight MVVM framework for Flutter that provides:
+
 - A clear ViewModel lifecycle
 - Fine-grained UI updates via ViewModel members
 - Declarative dependencies between members with topological ordering
 - Built-in members for values, lists, sets, streams, and common Flutter controllers
 - Hook-based utilities for ergonomic consumption in widgets
-- Integrations for [flutter_bloc](https://pub.dev/packages/flutter_bloc) and [riverpod](https://pub.dev/packages/riverpod)
+- Integrations for [flutter_bloc](https://pub.dev/packages/flutter_bloc)
+  and [riverpod](https://pub.dev/packages/riverpod)
 - Code generation for VMs & params
 
 ## Installation
@@ -50,22 +52,28 @@ dev_dependencies:
 
 - ViewModel
     - Implements the MVVM state holder and lifecycle
-    - Manages a list of members and their dependencies, ensuring topological initialization, updates, and disposal.
+    - Manages a list of members and their dependencies, ensuring topological initialization,
+      updates, and disposal.
     - Provides owner (the Flutter-side host) and param (configuration/state passed from the widget).
 - ViewModelDispatcher
-    - The ViewModelDispatcher widget (as well as corresponding dispatchers from meovm_bloc & meovm_riverpod) instantiates your ViewModel, wires lifecycle methods, provides param, and exposes the ViewModel to the widget tree via Inherited widgets.
+    - The ViewModelDispatcher widget (as well as corresponding dispatchers from meovm_bloc &
+      meovm_riverpod) instantiates your ViewModel, wires lifecycle methods, provides param, and
+      exposes the ViewModel to the widget tree via Inherited widgets.
 - Members
     - Encapsulated state units that are Listenable and can build widgets or notify changes.
     - Built-in members:
         - ValueMember, ListMember, SetMember
         - StreamMember
         - Navigation and modal flow helpers: NavigationMember, ModalFlowMember
-        - Flutter-oriented members: EditableTextMember, AnimationMember, FocusMember, TabMember, CustomChangeNotifierMember
-    - Members can be composed and can depend on each other. Dependencies let the framework update only affected parts of the UI in the right order.
+        - Flutter-oriented members: EditableTextMember, AnimationMember, FocusMember, TabMember,
+          CustomChangeNotifierMember
+    - Members can be composed and can depend on each other. Dependencies let the framework update
+      only affected parts of the UI in the right order.
 - Hooks and builders
     - `.build(...)` to produce a ListenableBuilder from members
     - `.use()` to consume member state in Hook widgets
-    - `NavigationMember.useNavigation(...)` and `ModalFlowMember.useModal(...)` to easily integrate navigation & VM
+    - `NavigationMember.useNavigation(...)` and `ModalFlowMember.useModal(...)` to easily integrate
+      navigation & VM
 
 ## Quick start
 
@@ -78,7 +86,7 @@ dev_dependencies:
     @Meovm()
     class CounterVm extends ViewModel<CounterParam?> with _$CounterVm {
       @override
-      late final count = ValueMember<int>(initial: 0, debugName: 'count');
+      late final count = member.value<int>(initial: 0, debugName: 'count');
     
       @override
       void increment() => count.data = count.data + 1;
@@ -116,7 +124,7 @@ dev_dependencies:
 3. Consume it in the UI:
 
    Using `.build(...)`:
-   
+
     ```dart
     class CounterView extends StatelessWidget {
       const CounterView({super.key});
@@ -141,7 +149,7 @@ dev_dependencies:
     ```
 
    Or with hooks and `.use()`:
-   
+
     ```dart
     import 'package:flutter_hooks/flutter_hooks.dart';
     
@@ -167,6 +175,12 @@ dev_dependencies:
     ```
 
 ## Members in detail
+
+Keep in mind:
+
+1. All members are Listenable and can be used with ListenableBuilder.
+2. All members can be declared directly or via `ViewModel.member` factory (preferred). Refer to
+   `ViewModelFactory` for more details.
 
 - ValueMember
     - Holds a single value. Updates notify listeners only when the value actually changes.
@@ -205,10 +219,10 @@ member in the constructor of member (typically in `resolver`):
 @Meovm()
 class SomeVm extends ViewModel with _$SomeVm {
   @override
-  late final memberA = ValueMember(initial: 0);
+  late final memberA = member.value(initial: 0);
 
   @override
-  late final memberB = ValueMember(
+  late final memberB = member.value(
     resolver: (_) => memberA.data + 1,
   );
 }
@@ -223,7 +237,7 @@ Note that you can use members from other VMs (passed within parameter) as well:
 @Meovm()
 class ExternalVm extends ViewModel with _$ExternalVm {
   @override
-  late final value = ValueMember(initial: 0);
+  late final value = member.value(initial: 0);
 }
 
 @Meovm()
@@ -234,7 +248,7 @@ class SomeParam extends ViewModelParameter with _$SomeParam {
   });
 
   @override
-  final ValueMember<int> externalMember;
+  final member.value<int> externalMember;
 
   @override
   final ExternalVm externalVm;
@@ -243,10 +257,10 @@ class SomeParam extends ViewModelParameter with _$SomeParam {
 @Meovm()
 class SomeVm extends ViewModel<SomeParam> with _$SomeVm {
   @override
-  late final memberA = ValueMember(resolver: (_) => param.externalMember.data + 1);
+  late final memberA = member.value(resolver: (_) => param.externalMember.data + 1);
 
   @override
-  late final memberB = ValueMember(
+  late final memberB = member.value(
     resolver: (_) => param.externalVm.value.data + 1,
   );
 }
@@ -256,9 +270,9 @@ Alternatively, if you're not using codegen, set dependencies manually:
 
 ```dart
 class SomeVm extends ViewModel {
-  late final memberA = ValueMember(initial: 0);
+  late final memberA = member.value(initial: 0);
 
-  late final memberB = ValueMember(
+  late final memberB = member.value(
     resolver: (_) => memberA.data + 1,
   );
 
@@ -286,6 +300,7 @@ final paramOrNull = context.useParamOrNull<MyParam>();
 ```
 
 ## Diagnostics
+
 All ViewModels and members implement rich diagnostics for Flutter DevTools via:
 
 - ViewModel prints current state and member list with dependencies
