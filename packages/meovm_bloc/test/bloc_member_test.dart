@@ -19,12 +19,12 @@ class _BlocMemberVm extends ViewModel {
 
   final _CounterCubit cubit;
 
-  late final member = BlocMember<_CounterCubit, int>(
+  late final blocMember = BlocMember<_CounterCubit, int>(
     resolver: (extract) => extract<_CounterCubit, int>(),
   );
 
   @override
-  List<ViewModelMember> get members => [member];
+  List<ViewModelMember> get members => [blocMember];
 
   @override
   void setDependencies(ViewModelDependencySetter depend) {
@@ -49,7 +49,7 @@ void main() {
               child: Builder(
                 builder: (context) {
                   final vm = context.useVM<_BlocMemberVm>();
-                  final member = vm.member;
+                  final member = vm.blocMember;
 
                   return Column(
                     mainAxisSize: MainAxisSize.min,
@@ -107,7 +107,7 @@ void main() {
               child: Builder(
                 builder: (context) {
                   final vm = context.useVM<_BlocMemberVm>();
-                  final member = vm.member;
+                  final member = vm.blocMember;
 
                   return Column(
                     mainAxisSize: MainAxisSize.min,

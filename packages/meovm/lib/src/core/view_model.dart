@@ -17,7 +17,8 @@ typedef DisposeListener = void Function(ViewModelMember disposed);
 /// For information on how to integrate ViewModel into the widget tree, see
 /// [ViewModelDispatcher].
 abstract class ViewModel<Param extends ViewModelParameter?>
-    implements ViewModelLifecycle<Param>, ViewModelMemberFactoryAccess {
+    with ViewModelMemberFactoryAccess
+    implements ViewModelLifecycle<Param> {
   @mustBeOverridden
   @visibleForOverriding
   List<ViewModelMember> get members => [];
@@ -351,15 +352,19 @@ abstract class ViewModelMember implements ViewModelMemberBase {
       StringProperty(debugName, '<unknown>', quoted: false);
 }
 
+// TODO: add codegen support
+@experimental
 abstract class ViewModelDelegate<
   VM extends ViewModel<Param>,
   Param extends ViewModelParameter
->
-    implements ViewModelMemberFactoryAccess {
-  const ViewModelDelegate({required this.owner});
+> with ViewModelMemberFactoryAccess {
+  ViewModelDelegate({required this.owner});
 
   @protected
   final VM owner;
+
+  @override
+  ViewModelState get state => owner.state;
 
   List<ViewModelMemberBase> get members;
 
