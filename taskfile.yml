@@ -1,0 +1,37 @@
+version: 3
+
+tasks:
+  bump:
+    vars:
+      mode: patch
+      pkgs: [ 'meovm', 'meovm_api', 'meovm_bloc', 'meovm_gen', 'meovm_gen_test', 'meovm_riverpod' ]
+
+    cmds:
+      - for:
+          var: pkgs
+        cmd: cd packages/{{.ITEM}} && cider bump {{.mode}}
+
+  update_md:
+    vars:
+      pkgs:
+        map:
+          meovm: ''
+          meovm_api: 'Side package for [meovm](https://pub.dev/packages/meovm). Adds high-level API for code generation.'
+          meovm_bloc: 'Side package for [meovm](https://pub.dev/packages/meovm). Provides integration with [flutter_bloc](https://pub.dev/packages/flutter_bloc).'
+          meovm_gen: 'Side package for [meovm](https://pub.dev/packages/meovm). Provides code generation for VMs & params.'
+          meovm_riverpod: 'Side package for [meovm](https://pub.dev/packages/meovm). Provides integration with [riverpod](https://pub.dev/packages/riverpod).'
+
+    env:
+      MAIN_README:
+        sh: cat README.md
+
+    cmds:
+      - for:
+          var: pkgs
+        cmd: |
+          cp -f CHANGELOG.md packages/{{.KEY}}/CHANGELOG.md
+          if [ -n "{{.ITEM}}" ]; then
+            printf "%s\n\n# Meovm\n\n%s" "{{.ITEM}}" "$MAIN_README" > packages/{{.KEY}}/README.md
+          else
+            printf "%s" "$MAIN_README" > packages/{{.KEY}}/README.md
+          fi
