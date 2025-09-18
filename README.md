@@ -248,7 +248,7 @@ class SomeParam extends ViewModelParameter with _$SomeParam {
   });
 
   @override
-  final member.value<int> externalMember;
+  final ValueMember<int> externalMember;
 
   @override
   final ExternalVm externalVm;
