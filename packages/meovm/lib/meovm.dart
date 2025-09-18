@@ -5,7 +5,6 @@ export 'package:meovm/src/core/feature.dart';
 export 'package:meovm/src/core/member_factory.dart';
 export 'package:meovm/src/members/common.dart';
 export 'package:meovm/src/members/flutter.dart';
-export 'package:meovm/src/members/group.dart';
 export 'package:meovm/src/members/navigation.dart';
 export 'package:meovm/src/members/value.dart';
 export 'package:meovm/src/members/stream.dart';

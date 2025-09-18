@@ -351,24 +351,3 @@ abstract class ViewModelMember implements ViewModelMemberBase {
   DiagnosticsNode toDiagnosticsNode() =>
       StringProperty(debugName, '<unknown>', quoted: false);
 }
-
-// TODO: add codegen support
-@experimental
-abstract class ViewModelDelegate<
-  VM extends ViewModel<Param>,
-  Param extends ViewModelParameter
-> with ViewModelMemberFactoryAccess {
-  ViewModelDelegate({required this.owner});
-
-  @protected
-  final VM owner;
-
-  @override
-  ViewModelState get state => owner.state;
-
-  List<ViewModelMemberBase> get members;
-
-  void setDependencies(ViewModelDependencySetter depend) {
-    // Intentionally left blank
-  }
-}
