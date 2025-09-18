@@ -1,3 +1,7 @@
+## Unreleased
+### Fixed
+- Typos in README.md
+
 ## 1.0.0 - 2025-09-17
 ### Added
 - High-level API
