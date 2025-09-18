@@ -15,16 +15,12 @@ class MemberGroup<K, M extends ViewModelMember> extends ViewModelMember
   MemberGroup({
     required List<K> keys,
     required GroupMemberBuilder<K, M> builder,
-    List<ViewModelMember>? dependOn,
     super.debugName,
   })  : _members = {
           for (final key in keys) key: builder(key),
-        },
-        _dependOn = dependOn ?? <ViewModelMember>[];
+        };
 
   final Map<K, M> _members;
-
-  final List<ViewModelMember> _dependOn;
 
   @nonVirtual
   List<ViewModelMember> get members => _members.values.toList();
@@ -39,23 +35,24 @@ class MemberGroup<K, M extends ViewModelMember> extends ViewModelMember
     }
   }
 
-  @mustCallSuper
-  void setDependencies(ViewModelDependencySetter depend) {
-    for (final slave in _members.values) {
-      for (final master in _dependOn) {
-        depend(master, slave);
-      }
+  @override
+  void notifyUpdateCompleted() {
+    for(final member in _members.values) {
+      // ? Must be called to ensure correct dependency behavior.
+      // ? Check out: https://github.com/da-cat7976/meovm/issues/26
+      // ignore: invalid_use_of_visible_for_overriding_member
+      member.notifyUpdateCompleted();
     }
   }
 
   @override
-  void notifyUpdateCompleted() {
-    // Intentionally left blank
-  }
-
-  @override
   void update() {
-    // Intentionally left blank
+    for(final member in _members.values) {
+      // ? Must be called to ensure correct dependency behavior.
+      // ? Check out: https://github.com/da-cat7976/meovm/issues/26
+      // ignore: invalid_use_of_visible_for_overriding_member
+      member.update();
+    }
   }
 
   @nonVirtual

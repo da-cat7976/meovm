@@ -311,6 +311,7 @@ abstract class ViewModelMember implements ViewModelMemberBase {
   void update();
 
   @override
+  @visibleForOverriding
   void notifyUpdateCompleted() {
     // Intentionally left blank
   }

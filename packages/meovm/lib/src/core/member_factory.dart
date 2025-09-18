@@ -143,12 +143,10 @@ class ViewModelMemberFactory {
   MemberGroup<K, M> memberGroup<K, M extends ViewModelMember>({
     required List<K> keys,
     required GroupMemberBuilder<K, M> builder,
-    List<ViewModelMember>? dependOn,
     String? debugName,
   }) => MemberGroup<K, M>(
     keys: keys,
     builder: builder,
-    dependOn: dependOn,
     debugName: debugName ?? 'MemberGroup #${nextId()}',
   );
 
