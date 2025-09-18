@@ -51,7 +51,7 @@ class FlutterMembersTests {
                 final editable = vm.editable;
 
                 return editable.build(
-                  builder: (_, __) => Text(
+                  builder: (_, _) => Text(
                     editable.controller.text,
                     key: const ValueKey('editable_text'),
                   ),
@@ -89,7 +89,7 @@ class FlutterMembersTests {
                 final anim = vm.animation;
 
                 return anim.build(
-                  builder: (_, __) => Text(
+                  builder: (_, _) => Text(
                     anim.controller.value.toStringAsFixed(1),
                     key: const ValueKey('anim_value'),
                   ),
@@ -130,7 +130,7 @@ class FlutterMembersTests {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       focus.build(
-                        builder: (_, __) => Text(
+                        builder: (_, _) => Text(
                           focus.node.hasFocus ? 'focused' : 'not focused',
                           key: const ValueKey('focus_state'),
                         ),
@@ -181,14 +181,14 @@ class FlutterMembersTests {
                   children: [
                     // Length is driven by tabsCount updates
                     tabsCount.build(
-                      builder: (_, __) => Text(
+                      builder: (_, _) => Text(
                         'len=${tabs.controller.length}',
                         key: const ValueKey('tabs_len'),
                       ),
                     ),
                     // Index is driven by TabController notifications
                     tabs.build(
-                      builder: (_, __) => Text(
+                      builder: (_, _) => Text(
                         'index=${tabs.controller.index}',
                         key: const ValueKey('tabs_index'),
                       ),
@@ -239,7 +239,7 @@ class FlutterMembersTests {
                 final member = vm.custom;
 
                 return member.build(
-                  builder: (_, __) => Text(
+                  builder: (_, _) => Text(
                     member.notifier.value.toString(),
                     key: const ValueKey('custom_value'),
                   ),

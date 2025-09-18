@@ -85,13 +85,13 @@ class ValueMembersTests {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     list.build(
-                      builder: (_, __) => Text(
+                      builder: (_, _) => Text(
                         list.data.join(', '),
                         key: const ValueKey('list'),
                       ),
                     ),
                     length.build(
-                      builder: (_, __) => Text(
+                      builder: (_, _) => Text(
                         length.data.toString(),
                         key: const ValueKey('list_length'),
                       ),
@@ -144,13 +144,13 @@ class ValueMembersTests {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     set.build(
-                      builder: (_, __) => Text(
+                      builder: (_, _) => Text(
                         sortedSetString(),
                         key: const ValueKey('set'),
                       ),
                     ),
                     length.build(
-                      builder: (_, __) => Text(
+                      builder: (_, _) => Text(
                         length.data.toString(),
                         key: const ValueKey('set_length'),
                       ),
