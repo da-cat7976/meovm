@@ -1,4 +1,10 @@
 ## Unreleased
+### Added
+- Custom linter:
+  - External modification lint for members
+  - Lifecycle methods use for members and VMs
+  - Abstract resolvers
+
 ### Fixed
 - Typos in README.md
 

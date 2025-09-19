@@ -13,44 +13,70 @@ A lightweight MVVM framework for Flutter that provides:
   and [riverpod](https://pub.dev/packages/riverpod)
 - Code generation for VMs & params
 
+## Table of contents
+- [Installation](#installation)
+  - [TL;DR](#tldr)
+- [Core concepts](#core-concepts)
+- [Quick start](#quick-start)
+- [Members in detail](#members-in-detail)
+- [Dependencies between members](#dependencies-between-members)
+- [Accessing ViewModel and params in widgets](#accessing-viewmodel-and-params-in-widgets)
+- [Diagnostics](#diagnostics)
+
 ## Installation
 
-Add to your pubspec.yaml:
+### TL;DR
 
-```yaml
-dependencies:
-  meovm: ^1.0.0
-  meovm_api: ^1.0.0   # Optional. Add if you're using codegen
-  flutter_hooks: ^0.21.3+1
-```
+1. Run:
 
-OR, if you're using [riverpod](https://pub.dev/packages/riverpod) as state manager:
+    ```bash
+    flutter pub add meovm meovm_api flutter_hooks dev:custom_lint dev:meovm_lint dev:build_runner dev:meovm_gen
+    ```
 
-```yaml
-dependencies:
-  meovm: ^1.0.0
-  meovm_api: ^1.0.0    # Optional. Add if you're using codegen
-  meovm_riverpod: ^1.0.0
-  flutter_hooks: ^0.21.3+1
-```
+2. Add to analysis_options.yaml (if not added yet):
 
-OR, if you're using [flutter_bloc](https://pub.dev/packages/flutter_bloc) as state manager:
+    ```yaml
+    analyzer:
+      plugins:
+        - custom_lint
+    ```
 
-```yaml
-dependencies:
-  meovm: ^1.0.0
-  meovm_api: ^1.0.0    # Optional. Add if you're using codegen
-  meovm_bloc: ^1.0.0
-  flutter_hooks: ^0.21.3+1
-```
+3. Integrate with your state manager:
 
-For code generation (optional, if you use annotations from meovm_api):
+   Riverpod:
 
-```yaml
-dev_dependencies:
-  build_runner: ^2.5.4
-  meovm_gen: ^1.0.0
-```
+    ```bash
+    flutter pub add meovm_riverpod
+    ```
+
+   Bloc:
+
+    ```bash
+    flutter pub add meovm_bloc
+    ```
+
+### Packages overview
+
+- This package: core package that implements core idea of the framework
+- [meovm_api](https://pub.dev/packages/meovm_api): annotations & interfaces required to work with
+  linter & codegen
+- [meovm_gen](https://pub.dev/packages/meovm_gen): code generation for VMs & params
+- [meovm_lint](https://pub.dev/packages/meovm_lint): linter that keeps you away from the most common
+  mistakes
+- [meovm_bloc](https://pub.dev/packages/meovm_bloc): integration
+  with [flutter_bloc](https://pub.dev/packages/flutter_bloc)
+- [meovm_riverpod](https://pub.dev/packages/meovm_riverpod): integration
+  with [riverpod](https://pub.dev/packages/riverpod)
+
+Just add selected packages via `flutter pub add`. And don't forget to add:
+1. `flutter_hooks` to use
+navigation members (and `hooks_riverpod` if you use riverpod).
+2. Following to `analysis_options.yaml`:
+    ```yaml
+    analyzer:
+      plugins:
+        - custom_lint
+    ```
 
 ## Core concepts
 
@@ -305,7 +331,7 @@ final paramOrNull = context.useParamOrNull<MyParam>();
 
 ## Diagnostics
 
-All ViewModels and members implement rich diagnostics for Flutter DevTools via:
+All ViewModels and members implement diagnostics for Flutter DevTools:
 
 - ViewModel prints current state and member list with dependencies
 - Members print meaningful current values, lengths, focus state, etc.
