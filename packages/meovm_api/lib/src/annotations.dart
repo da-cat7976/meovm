@@ -53,3 +53,11 @@ const meovmInternal = _MeovmInternal();
 final class _MeovmInternal {
   const _MeovmInternal();
 }
+
+/// Annotates class member as lifecycle method that should not be used outside
+/// of ViewModel or ViewModelDispatcher.
+const meovmLifecycle = _MeovmLifecycle();
+
+final class _MeovmLifecycle {
+  const _MeovmLifecycle();
+}
