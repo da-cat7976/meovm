@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:graphs/graphs.dart';
 import 'package:meovm/src/core/api.dart';
 import 'package:meovm/src/core/member_factory.dart';
+import 'package:meovm_api/meovm_api.dart';
 
 /// Function for defining dependencies between ViewModel members.
 typedef ViewModelDependencySetter =
@@ -70,6 +71,7 @@ abstract class ViewModel<Param extends ViewModelParameter?>
 
   @override
   @mustCallSuper
+  @meovmLifecycle
   void init(ViewModelOwner<Param> owner) {
     if (_state != ViewModelState.created) {
       throw StateError(
@@ -92,6 +94,7 @@ abstract class ViewModel<Param extends ViewModelParameter?>
   }
 
   @override
+  @meovmLifecycle
   void updateDependencies() {
     final Set<ViewModelMember> invalidatedSources = Set.of(_dependencies.keys);
     for (final member in _members) {
@@ -189,6 +192,7 @@ abstract class ViewModel<Param extends ViewModelParameter?>
   /// changes, all dependent members will be updated, and independent ones will not.
   ///
   /// {@endtemplate}
+  @meovmLifecycle
   @visibleForOverriding
   void setDependencies(ViewModelDependencySetter depend) {
     // Intentionally left blank
@@ -196,6 +200,7 @@ abstract class ViewModel<Param extends ViewModelParameter?>
 
   @override
   @mustCallSuper
+  @meovmLifecycle
   void update() {
     if (_state != ViewModelState.active) {
       throw StateError(
@@ -219,6 +224,7 @@ abstract class ViewModel<Param extends ViewModelParameter?>
   }
 
   @override
+  @meovmLifecycle
   @mustCallSuper
   void dispose() {
     if (_state != ViewModelState.active) {
@@ -251,6 +257,7 @@ abstract class ViewModel<Param extends ViewModelParameter?>
   }
 
   @override
+  @meovmLifecycle
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     properties
       ..add(EnumProperty('State', _state))
@@ -298,6 +305,7 @@ abstract class ViewModelMember implements ViewModelMemberBase {
 
   @override
   @mustCallSuper
+  @meovmLifecycle
   @visibleForOverriding
   void init(ViewModelOwner owner) {
     assert(_owner == null, 'Member is already initialized');
@@ -306,10 +314,12 @@ abstract class ViewModelMember implements ViewModelMemberBase {
   }
 
   @override
+  @meovmLifecycle
   @visibleForOverriding
   void update();
 
   @override
+  @meovmLifecycle
   @visibleForOverriding
   void notifyUpdateCompleted() {
     // Intentionally left blank
@@ -317,6 +327,7 @@ abstract class ViewModelMember implements ViewModelMemberBase {
 
   @override
   @mustCallSuper
+  @meovmLifecycle
   @visibleForOverriding
   void dispose() {
     assert(_owner != null, 'Member is not initialized');
@@ -329,16 +340,19 @@ abstract class ViewModelMember implements ViewModelMemberBase {
     _disposeListeners.clear();
   }
 
+  @meovmLifecycle
   @visibleForTesting
   void addDisposeListener(DisposeListener listener) {
     _disposeListeners.add(listener);
   }
 
+  @meovmLifecycle
   @visibleForTesting
   void removeDisposeListener(DisposeListener listener) {
     _disposeListeners.remove(listener);
   }
 
+  @meovmLifecycle
   @visibleForTesting
   void lifecycleAwareRemoveListener(VoidCallback listener) {
     if (_owner == null) return;
@@ -346,6 +360,7 @@ abstract class ViewModelMember implements ViewModelMemberBase {
   }
 
   @override
+  @meovmLifecycle
   @visibleForOverriding
   DiagnosticsNode toDiagnosticsNode() =>
       StringProperty(debugName, '<unknown>', quoted: false);

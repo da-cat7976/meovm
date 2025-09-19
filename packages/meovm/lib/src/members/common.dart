@@ -1,3 +1,5 @@
+// ignore_for_file: meovm_external_modification
+
 import 'package:flutter/foundation.dart';
 import 'package:meovm/src/core/view_model.dart';
 import 'package:meovm/src/members/utils.dart';
