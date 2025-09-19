@@ -5,7 +5,7 @@ import 'package:meovm_api/meovm_api.dart';
 class TestMember extends ViewModelMember with ChangeNotifier {
   @override
   void update() {
-    // TODO: implement update
+    // Intentionally left blank
   }
 
   @meovmInternal
@@ -44,6 +44,7 @@ class TestVm extends ViewModel {
   }
 }
 
+// ignore: unused_element
 mixin _$TestVm on ViewModel {
   TestMember get test;
 
