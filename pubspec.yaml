@@ -13,3 +13,8 @@ workspace:
   - packages/meovm/example
   - packages/meovm_riverpod/example
   - packages/meovm_bloc/example
+  - packages/meovm_lint
+
+dev_dependencies:
+  custom_lint: ^0.8.0
+  meovm_lint: ^1.0.1

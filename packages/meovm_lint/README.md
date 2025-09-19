@@ -1,3 +1,7 @@
+Side package for [meovm](https://pub.dev/packages/meovm). Provides lint rules to maintain code quality and stability.
+
+# Meovm
+
 A lightweight MVVM framework for Flutter that provides:
 
 - A clear ViewModel lifecycle

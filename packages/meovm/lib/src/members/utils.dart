@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:meovm/src/core/view_model.dart';
+import 'package:meovm_api/meovm_api.dart';
 import 'package:meta/meta.dart';
 
 /// A mixin that provides a way to freeze the current state of the member.
@@ -52,6 +53,7 @@ mixin FreezableDataMixin<T> on ViewModelMember {
   /// changes.
   bool get frozen => _frozen;
 
+  @meovmInternal
   set frozen(bool value) {
     if (!_frozen) {
       _data = _skippedData ?? _data;
@@ -76,6 +78,7 @@ mixin FreezableDataMixin<T> on ViewModelMember {
   /// someMember.unfreeze();
   /// ```
   @nonVirtual
+  @meovmInternal
   Future<R> doFrozen<R>(FutureOr<R> Function() action) async {
     frozen = true;
     final result = await action();
@@ -98,6 +101,7 @@ mixin ChangeTracker on ViewModelMember {
 
   bool _wasChanged = false;
 
+  @protected
   @mustCallSuper
   void notifyChanged() {
     _wasChanged = true;
@@ -126,6 +130,7 @@ mixin NotifierChangeTracker on ViewModelMember, ChangeNotifier {
 
   bool _wasChanged = false;
 
+  @protected
   @mustCallSuper
   void notifyChanged() {
     _wasChanged = true;

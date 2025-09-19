@@ -1,3 +1,4 @@
+// ignore_for_file: meovm_invalid_lifecycle_access
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meovm/meovm.dart';
 import 'package:mockito/annotations.dart';

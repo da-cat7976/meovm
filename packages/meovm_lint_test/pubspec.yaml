@@ -1,0 +1,38 @@
+name: playground
+description: "A new Flutter project."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.9.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+  meovm:
+  meovm_api:
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^6.0.0
+  build_runner: ^2.7.1
+  meovm_gen:
+  meovm_lint:
+  custom_lint: ^0.8.0
+
+dependency_overrides:
+  meovm:
+    path: ../meovm
+  meovm_api:
+    path: ../meovm_api
+  meovm_gen:
+    path: ../meovm_gen
+  meovm_lint:
+    path: ../meovm_lint
+
+flutter:
+  uses-material-design: true

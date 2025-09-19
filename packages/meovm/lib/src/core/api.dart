@@ -5,7 +5,7 @@ import 'package:meovm_api/meovm_api.dart';
 /// An interface for the owner of the ViewModel, through which the ViewModel
 /// and its members can interact with Flutter.
 abstract interface class ViewModelOwner<Param extends ViewModelParameter?>
-    implements TickerProvider {
+    implements TickerProvider, MeovmAutoVmOwner<Param> {
   Param get param;
 
   /// Requests a feature from the owner.
@@ -16,7 +16,7 @@ abstract interface class ViewModelOwner<Param extends ViewModelParameter?>
 
 /// Base interface for external ViewModel features such as state manager
 /// integration.
-abstract interface class ViewModelOwnerFeature {
+abstract interface class ViewModelOwnerFeature implements MeovmAutoVmFeature {
   /// Represents [State.initState].
   void init();
 

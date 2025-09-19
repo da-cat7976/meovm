@@ -44,3 +44,20 @@ final class MeovmDepend {
   int get hashCode =>
       dependOn.hashCode ^ from.hashCode ^ external.hashCode ^ disabled.hashCode;
 }
+
+/// Annotates field, getter, setter or method as not intended to use outside of
+/// ViewModel.
+const meovmInternal = _MeovmInternal();
+
+@Target({TargetKind.field, TargetKind.getter, TargetKind.setter, TargetKind.method})
+final class _MeovmInternal {
+  const _MeovmInternal();
+}
+
+/// Annotates class member as lifecycle method that should not be used outside
+/// of ViewModel or ViewModelDispatcher.
+const meovmLifecycle = _MeovmLifecycle();
+
+final class _MeovmLifecycle {
+  const _MeovmLifecycle();
+}
