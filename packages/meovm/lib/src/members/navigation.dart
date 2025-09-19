@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:meovm/src/core/view_model.dart';
 import 'package:meovm/src/members/utils.dart';
 import 'package:meovm/src/members/value.dart';
+import 'package:meovm_api/meovm_api.dart';
 
 /// Member that allows controlling navigation from the ViewModel.
 ///
@@ -76,6 +77,7 @@ class NavigationMember<T> extends ValueMember<T> {
   final T? _autoResetValue;
 
   @override
+  @meovmInternal
   set data(T value) {
     if (_autoReset) super.data = _autoResetValue as T;
     super.data = value;
@@ -195,6 +197,7 @@ class ModalFlowMember<Result> extends ViewModelMember with ChangeNotifier, Notif
   /// its closure has not yet arrived, reopening will not occur, and the
   /// Future associated with the previous request will be returned.
   @mustCallSuper
+  @meovmInternal
   Future<Result?> requestModal() async {
     if (isModalRequested) return _completer!.future;
     _completer = Completer();
@@ -222,6 +225,8 @@ class ModalFlowMember<Result> extends ViewModelMember with ChangeNotifier, Notif
   }
 
   /// Resets the member's state, closing the modal window if it was requested.
+  @meovmInternal
+  @mustCallSuper
   void reset() {
     if (isModalRequested) {
       _completer!.complete(null);

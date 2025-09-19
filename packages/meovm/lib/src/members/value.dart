@@ -4,6 +4,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:meovm/src/members/common.dart';
 import 'package:meovm/src/members/utils.dart';
+import 'package:meovm_api/meovm_api.dart';
 
 typedef ValueMemberResolver<T> = T Function(T? data);
 
@@ -61,6 +62,7 @@ class ValueMember<T> extends BuildableViewModelMember
     return data as T;
   }
 
+  @meovmInternal
   set data(T value) {
     if (_data == value) return;
 
@@ -185,108 +187,126 @@ class ListMember<T> extends BuildableViewModelMember
     _data = null;
   }
 
+  @meovmInternal
   @mustCallSuper
   void add(T element) {
     _data?.add(element);
     notifyChanged();
   }
 
+  @meovmInternal
   @mustCallSuper
   void addAll(Iterable<T> elements) {
     _data?.addAll(elements);
     notifyChanged();
   }
 
+  @meovmInternal
   @mustCallSuper
   void sort([int Function(T a, T b)? compare]) {
     _data?.sort(compare);
     notifyChanged();
   }
 
+  @meovmInternal
   @mustCallSuper
   void shuffle([Random? random]) {
     _data?.shuffle(random);
     notifyChanged();
   }
 
+  @meovmInternal
   @mustCallSuper
   void clear() {
     _data?.clear();
     notifyChanged();
   }
 
+  @meovmInternal
   @mustCallSuper
   void insert(int index, T element) {
     _data?.insert(index, element);
     notifyChanged();
   }
 
+  @meovmInternal
   @mustCallSuper
   void insertAll(int index, Iterable<T> elements) {
     _data?.insertAll(index, elements);
     notifyChanged();
   }
 
+  @meovmInternal
   @mustCallSuper
   void setAll(int index, Iterable<T> elements) {
     _data?.setAll(index, elements);
     notifyChanged();
   }
 
+  @meovmInternal
   @mustCallSuper
   void remove(T element) {
     _data?.remove(element);
     notifyChanged();
   }
 
+  @meovmInternal
   @mustCallSuper
   void removeAt(int index) {
     _data?.removeAt(index);
     notifyChanged();
   }
 
+  @meovmInternal
   @mustCallSuper
   void removeLast() {
     _data?.removeLast();
     notifyChanged();
   }
 
+  @meovmInternal
   @mustCallSuper
   void removeWhere(bool Function(T element) test) {
     _data?.removeWhere(test);
     notifyChanged();
   }
 
+  @meovmInternal
   @mustCallSuper
   void retainWhere(bool Function(T element) test) {
     _data?.retainWhere(test);
     notifyChanged();
   }
 
+  @meovmInternal
   @mustCallSuper
   void setRange(int start, int end, Iterable<T> iterable, [int skipCount = 0]) {
     _data?.setRange(start, end, iterable, skipCount);
     notifyChanged();
   }
 
+  @meovmInternal
   @mustCallSuper
   void removeRange(int start, int end) {
     _data?.removeRange(start, end);
     notifyChanged();
   }
 
+  @meovmInternal
   @mustCallSuper
   void fillRange(int start, int end, [T? fillValue]) {
     _data?.fillRange(start, end, fillValue);
     notifyChanged();
   }
 
+  @meovmInternal
   @mustCallSuper
   void replaceRange(int start, int end, Iterable<T> newContents) {
     _data?.replaceRange(start, end, newContents);
     notifyChanged();
   }
 
+  @meovmInternal
   @mustCallSuper
   void operator []=(int index, T value) {
     _data?[index] = value;
@@ -347,42 +367,49 @@ class SetMember<T> extends BuildableViewModelMember
     _data = null;
   }
 
+  @meovmInternal
   @mustCallSuper
   void add(T element) {
     _data?.add(element);
     notifyChanged();
   }
 
+  @meovmInternal
   @mustCallSuper
   void addAll(Iterable<T> elements) {
     _data?.addAll(elements);
     notifyChanged();
   }
 
+  @meovmInternal
   @mustCallSuper
   void clear() {
     _data?.clear();
     notifyChanged();
   }
 
+  @meovmInternal
   @mustCallSuper
   void remove(T element) {
     _data?.remove(element);
     notifyChanged();
   }
 
+  @meovmInternal
   @mustCallSuper
   void removeWhere(bool Function(T element) test) {
     _data?.removeWhere(test);
     notifyChanged();
   }
 
+  @meovmInternal
   @mustCallSuper
   void retainWhere(bool Function(T element) test) {
     _data?.retainWhere(test);
     notifyChanged();
   }
 
+  @meovmInternal
   @mustCallSuper
   void removeAll(Iterable<T?> elements) {
     _data?.removeAll(elements);
