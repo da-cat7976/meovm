@@ -1,17 +1,11 @@
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/element/element2.dart';
+import 'package:analyzer/error/error.dart' show ErrorSeverity;
 import 'package:custom_lint_builder/custom_lint_builder.dart';
 import 'package:meovm_lint/src/rules/common/member.dart';
 
 class LifecycleAccessRule extends MemberAccessRule {
   LifecycleAccessRule() : super(code: _code);
-
-  static const _code = LintCode(
-    name: 'meovm_invalid_lifecycle_access',
-    problemMessage:
-        'Do not access ViewModelMember\'s and ViewModel\'s lifecycle methods '
-        'outside of ViewModelMember, ViewModel & ViewModelDispatcher',
-  );
 
   @override
   bool checkElement(Element2? element, AstNode node) {
@@ -27,10 +21,12 @@ class LifecycleAccessRule extends MemberAccessRule {
     final mixinElement = enclosingMixin?.declaredFragment?.element;
 
     for (final checker in _classCheckers) {
-      final isInClassDeclaration = classElement != null && checker.isAssignableFrom(classElement);
-      final isInMixinDeclaration = mixinElement != null && checker.isAssignableFrom(mixinElement);
+      final isInClassDeclaration =
+          classElement != null && checker.isAssignableFrom(classElement);
+      final isInMixinDeclaration =
+          mixinElement != null && checker.isAssignableFrom(mixinElement);
 
-      if(isInClassDeclaration || isInMixinDeclaration) return false;
+      if (isInClassDeclaration || isInMixinDeclaration) return false;
     }
 
     return true;
@@ -67,4 +63,12 @@ class LifecycleAccessRule extends MemberAccessRule {
     _ownerChecker,
     _featureChecker,
   ];
+
+  static const _code = LintCode(
+    name: 'meovm_invalid_lifecycle_access',
+    problemMessage:
+        'Do not access ViewModelMember\'s and ViewModel\'s lifecycle methods '
+        'outside of ViewModelMember, ViewModel & ViewModelDispatcher',
+    errorSeverity: ErrorSeverity.WARNING,
+  );
 }
