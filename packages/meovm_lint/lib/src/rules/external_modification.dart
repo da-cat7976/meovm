@@ -17,15 +17,19 @@ class ExternalModificationRule extends MemberAccessRule {
 
     final enclosingClass = node.thisOrAncestorOfType<ClassDeclaration>();
     final classElement = enclosingClass?.declaredFragment?.element;
-    final inViewModelClass =
-        classElement != null && _classChecker.isAssignableFrom(classElement);
 
     final enclosingMixin = node.thisOrAncestorOfType<MixinDeclaration>();
     final mixinElement = enclosingMixin?.declaredFragment?.element;
-    final inViewModelMixin =
-        mixinElement != null && _classChecker.isAssignableFrom(mixinElement);
 
-    if (inViewModelClass || inViewModelMixin) return false;
+    for (final checker in _classCheckers) {
+      final inViewModelClass =
+          classElement != null && checker.isAssignableFrom(classElement);
+      final inViewModelMixin =
+          mixinElement != null && checker.isAssignableFrom(mixinElement);
+
+      if (inViewModelClass || inViewModelMixin) return false;
+    }
+
     return true;
   }
 
@@ -42,8 +46,15 @@ class ExternalModificationRule extends MemberAccessRule {
     packageName: 'meovm_api',
   );
 
-  static final _classChecker = TypeChecker.fromName(
+  static final _vmChecker = TypeChecker.fromName(
     'MeovmAutoVm',
     packageName: 'meovm_api',
   );
+
+  static final _memberChecker = TypeChecker.fromName(
+    'MeovmAutoVmMember',
+    packageName: 'meovm_api',
+  );
+
+  static final _classCheckers = [_vmChecker, _memberChecker];
 }
