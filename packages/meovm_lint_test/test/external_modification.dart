@@ -34,6 +34,26 @@ class TestMember extends ViewModelMember with ChangeNotifier {
 
 class TestVm extends ViewModel {
   late final test = TestMember();
+
+  void testInternally() {
+    test.field;
+    test.getter;
+    test.setter = 1;
+    test.method();
+    test[1] = 1;
+  }
+}
+
+mixin _$TestVm on ViewModel {
+  TestMember get test;
+
+  void testInMixin() {
+    test.field;
+    test.getter;
+    test.setter = 1;
+    test.method();
+    test[1] = 1;
+  }
 }
 
 void fun() {
