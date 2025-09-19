@@ -13,6 +13,7 @@ dependencies:
   analyzer: ^7.6.0
   analyzer_plugin: ^0.13.4
   custom_lint_builder: ^0.8.0
+  meovm_api: ^1.0.1
 
 dev_dependencies:
   lints: ^6.0.0
