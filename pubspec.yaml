@@ -13,3 +13,4 @@ workspace:
   - packages/meovm/example
   - packages/meovm_riverpod/example
   - packages/meovm_bloc/example
+  - packages/meovm_lint

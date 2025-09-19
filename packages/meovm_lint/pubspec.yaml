@@ -1,0 +1,18 @@
+name: meovm_lint
+description: A starting point for Dart libraries or applications.
+version: 1.0.1
+repository: https://github.com/da-cat7976/meovm
+issue_tracker: https://github.com/da-cat7976/meovm/issues
+
+resolution: workspace
+
+environment:
+  sdk: ^3.9.2
+
+# Add regular dependencies here.
+dependencies:
+  # path: ^1.9.0
+
+dev_dependencies:
+  lints: ^6.0.0
+  test: ^1.25.6
