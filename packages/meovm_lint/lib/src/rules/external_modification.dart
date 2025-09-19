@@ -75,10 +75,15 @@ class ExternalModificationRule extends DartLintRule {
 
     final enclosingClass = node.thisOrAncestorOfType<ClassDeclaration>();
     final classElement = enclosingClass?.declaredFragment?.element;
-    if (classElement != null && _classChecker.isAssignableFrom(classElement)) {
-      return false;
-    }
+    final inViewModelClass =
+        classElement != null && _classChecker.isAssignableFrom(classElement);
 
+    final enclosingMixin = node.thisOrAncestorOfType<MixinDeclaration>();
+    final mixinElement = enclosingMixin?.declaredFragment?.element;
+    final inViewModelMixin =
+        mixinElement != null && _classChecker.isAssignableFrom(mixinElement);
+
+    if (inViewModelClass || inViewModelMixin) return false;
     return true;
   }
 
