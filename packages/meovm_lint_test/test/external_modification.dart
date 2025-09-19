@@ -25,6 +25,11 @@ class TestMember extends ViewModelMember with ChangeNotifier {
   void method() {
     // Intentionally left blank
   }
+
+  @meovmInternal
+  void operator []=(int index, int value) {
+    // Intentionally left blank
+  }
 }
 
 class TestVm extends ViewModel {
@@ -41,4 +46,6 @@ void fun() {
   vm.test.setter = 1;
   // expect_lint: meovm_external_modification
   vm.test.method();
+  // expect_lint: meovm_external_modification
+  vm.test[1] = 1;
 }
