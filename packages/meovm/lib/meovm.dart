@@ -1,5 +1,6 @@
 export 'package:meovm/src/core/api.dart';
 export 'package:meovm/src/core/dispatcher.dart';
+export 'package:meovm/src/core/retrieval.dart';
 export 'package:meovm/src/core/view_model.dart';
 export 'package:meovm/src/core/feature.dart';
 export 'package:meovm/src/core/member_factory.dart';
