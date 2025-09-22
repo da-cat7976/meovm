@@ -19,10 +19,15 @@ mixin ViewModelDispatcherBase<
   Param extends ViewModelParameter?
 >
     on StatefulWidget {
+
+  /// Factory function that creates ViewModel instance. Typically, constructors
+  /// of VMs itself.
   ViewModelFactory<VM, Param> get factory;
 
+  /// Current parameter passed to VM.
   Param get param;
 
+  /// Should be VM & param scoped (allows VM & param retrieval by supertype).
   bool get scope;
 
   Widget get child;
