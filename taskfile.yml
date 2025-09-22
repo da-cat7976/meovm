@@ -11,6 +11,7 @@ tasks:
           enum: [patch, minor, major]
 
     cmds:
+      - cider bump {{.mode}}
       - for:
           var: pkgs
         cmd: cd packages/{{.ITEM}} && cider bump {{.mode}}
