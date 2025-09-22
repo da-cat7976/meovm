@@ -9,11 +9,22 @@ class RiverpodVmDispatcher<
 >
     extends ConsumerStatefulWidget
     with ViewModelDispatcherBase<VM, Param> {
+  const RiverpodVmDispatcher({
+    super.key,
+    required this.factory,
+    required this.param,
+    this.scope = false,
+    required this.child,
+  });
+
   @override
   final ViewModelFactory<VM, Param> factory;
 
   @override
   final Param param;
+
+  @override
+  final bool scope;
 
   @override
   final Widget child;
@@ -22,13 +33,6 @@ class RiverpodVmDispatcher<
   RiverpodVmDispatcherState<VM, Param> createState() {
     return RiverpodVmDispatcherState<VM, Param>();
   }
-
-  const RiverpodVmDispatcher({
-    super.key,
-    required this.child,
-    required this.factory,
-    required this.param,
-  });
 }
 
 class RiverpodVmDispatcherState<
@@ -44,7 +48,5 @@ class RiverpodVmDispatcherState<
         >,
         TickerProviderStateMixin {
   @override
-  List<ViewModelOwnerFeature> get features => [
-    RiverpodViewModelOwnerFeature(),
-  ];
+  List<ViewModelOwnerFeature> get features => [RiverpodViewModelOwnerFeature()];
 }

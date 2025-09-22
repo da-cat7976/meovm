@@ -23,6 +23,8 @@ mixin ViewModelDispatcherBase<
 
   Param get param;
 
+  bool get scope;
+
   Widget get child;
 }
 
@@ -70,7 +72,7 @@ mixin ViewModelDispatcherStateBase<
 
     _features = features;
     for (final feature in _features) {
-      if(feature is StateDependentVmOwnerFeature) {
+      if (feature is StateDependentVmOwnerFeature) {
         feature.bind(this);
       }
 
@@ -117,9 +119,18 @@ mixin ViewModelDispatcherStateBase<
   Widget build(BuildContext context) {
     _viewModel.update();
 
-    return ViewModelParamProvider(
+    final providers = ViewModelParamProvider(
       param: _param,
       child: ViewModelProvider<VM>(viewModel: _viewModel, child: widget.child),
+    );
+
+    if (!widget.scope) return providers;
+
+    return ViewModelScope(
+      context: context,
+      vm: _viewModel,
+      param: param,
+      child: providers,
     );
   }
 
@@ -129,6 +140,7 @@ mixin ViewModelDispatcherStateBase<
     super.debugFillProperties(properties);
     _viewModel.debugFillProperties(properties);
   }
+
   // coverage:ignore-end
 }
 
@@ -140,17 +152,19 @@ class ViewModelDispatcher<
     with ViewModelDispatcherBase<VM, Param> {
   const ViewModelDispatcher({
     super.key,
-    required this.child,
     required this.factory,
     required this.param,
+    this.scope = false,
+    required this.child,
   }) : _features = const [];
 
   @visibleForTesting
   const ViewModelDispatcher.test({
     super.key,
-    required this.child,
     required this.factory,
     required this.param,
+    this.scope = false,
+    required this.child,
     required List<ViewModelOwnerFeature> features,
   }) : _features = features;
 
@@ -159,6 +173,9 @@ class ViewModelDispatcher<
 
   @override
   final Param param;
+
+  @override
+  final bool scope;
 
   @override
   final Widget child;
