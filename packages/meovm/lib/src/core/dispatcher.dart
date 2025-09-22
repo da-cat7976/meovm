@@ -3,6 +3,8 @@ import 'package:flutter/foundation.dart';
 import 'package:meovm/src/core/api.dart';
 import 'package:meovm/src/core/feature.dart';
 
+import 'retrieval.dart';
+
 /// Factory function that creates ViewModel instance. Typically, constructors
 /// of VMs itself.
 typedef ViewModelFactory<
@@ -17,9 +19,16 @@ mixin ViewModelDispatcherBase<
   Param extends ViewModelParameter?
 >
     on StatefulWidget {
+
+  /// Factory function that creates ViewModel instance. Typically, constructors
+  /// of VMs itself.
   ViewModelFactory<VM, Param> get factory;
 
+  /// Current parameter passed to VM.
   Param get param;
+
+  /// Should be VM & param scoped (allows VM & param retrieval by supertype).
+  bool get scope;
 
   Widget get child;
 }
@@ -68,7 +77,7 @@ mixin ViewModelDispatcherStateBase<
 
     _features = features;
     for (final feature in _features) {
-      if(feature is StateDependentVmOwnerFeature) {
+      if (feature is StateDependentVmOwnerFeature) {
         feature.bind(this);
       }
 
@@ -115,9 +124,18 @@ mixin ViewModelDispatcherStateBase<
   Widget build(BuildContext context) {
     _viewModel.update();
 
-    return ViewModelParamProvider(
+    final providers = ViewModelParamProvider(
       param: _param,
       child: ViewModelProvider<VM>(viewModel: _viewModel, child: widget.child),
+    );
+
+    if (!widget.scope) return providers;
+
+    return ViewModelScope(
+      context: context,
+      vm: _viewModel,
+      param: param,
+      child: providers,
     );
   }
 
@@ -127,80 +145,9 @@ mixin ViewModelDispatcherStateBase<
     super.debugFillProperties(properties);
     _viewModel.debugFillProperties(properties);
   }
+
   // coverage:ignore-end
 }
-
-class ViewModelProvider<VM extends ViewModelLifecycle> extends InheritedWidget {
-  ViewModelProvider({required super.child, required this.viewModel})
-    : super(key: ValueKey(viewModel));
-
-  final VM viewModel;
-
-  @override
-  bool updateShouldNotify(covariant ViewModelProvider<VM> oldWidget) =>
-      oldWidget.viewModel != viewModel;
-}
-
-class ViewModelParamProvider<Param> extends InheritedWidget {
-  ViewModelParamProvider({required super.child, required this.param})
-    : super(key: ValueKey(param));
-
-  final Param param;
-
-  @override
-  bool updateShouldNotify(covariant ViewModelParamProvider<Param> oldWidget) =>
-      oldWidget.param != param;
-}
-
-// ? Since this is an extension providing access to VMs and params using
-// ? InheritedWidget mechanism, testing this code is not necessary.
-// coverage:ignore-start
-extension ViewModelContext on BuildContext {
-  // ignore: strict_raw_type
-  VM useVM<VM extends ViewModelLifecycle>({bool listen = true}) {
-    final inherited = listen
-        ? dependOnInheritedWidgetOfExactType<ViewModelProvider<VM>>()
-        : getInheritedWidgetOfExactType<ViewModelProvider<VM>>();
-
-    assert(
-      inherited is ViewModelProvider<VM>,
-      'No ViewModel with type $VM found in the widget tree',
-    );
-
-    return inherited!.viewModel;
-  }
-
-  // ignore: strict_raw_type
-  VM? useVmOrNull<VM extends ViewModelLifecycle>({bool listen = true}) {
-    final inherited = listen
-        ? dependOnInheritedWidgetOfExactType<ViewModelProvider<VM>>()
-        : getInheritedWidgetOfExactType<ViewModelProvider<VM>>();
-
-    return inherited?.viewModel;
-  }
-
-  Param useParam<Param>({bool listen = true}) {
-    final inherited = listen
-        ? dependOnInheritedWidgetOfExactType<ViewModelParamProvider<Param>>()
-        : getInheritedWidgetOfExactType<ViewModelParamProvider<Param>>();
-
-    assert(
-      inherited is ViewModelParamProvider<Param>,
-      'No ViewModel param with type $Param found in the widget tree',
-    );
-
-    return inherited!.param;
-  }
-
-  Param? useParamOrNull<Param>({bool listen = true}) {
-    final inherited = listen
-        ? dependOnInheritedWidgetOfExactType<ViewModelParamProvider<Param>>()
-        : getInheritedWidgetOfExactType<ViewModelParamProvider<Param>>();
-
-    return inherited?.param;
-  }
-}
-// coverage:ignore-end
 
 class ViewModelDispatcher<
   VM extends ViewModelLifecycle<Param>,
@@ -210,17 +157,19 @@ class ViewModelDispatcher<
     with ViewModelDispatcherBase<VM, Param> {
   const ViewModelDispatcher({
     super.key,
-    required this.child,
     required this.factory,
     required this.param,
+    this.scope = false,
+    required this.child,
   }) : _features = const [];
 
   @visibleForTesting
   const ViewModelDispatcher.test({
     super.key,
-    required this.child,
     required this.factory,
     required this.param,
+    this.scope = false,
+    required this.child,
     required List<ViewModelOwnerFeature> features,
   }) : _features = features;
 
@@ -229,6 +178,9 @@ class ViewModelDispatcher<
 
   @override
   final Param param;
+
+  @override
+  final bool scope;
 
   @override
   final Widget child;

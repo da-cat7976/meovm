@@ -3,8 +3,12 @@ version: 3
 tasks:
   bump:
     vars:
-      mode: patch
       pkgs: [ 'meovm', 'meovm_api', 'meovm_bloc', 'meovm_gen', 'meovm_gen_test', 'meovm_riverpod', 'meovm_lint' ]
+
+    requires:
+      vars:
+        - name: mode
+          enum: [patch, minor, major]
 
     cmds:
       - for:

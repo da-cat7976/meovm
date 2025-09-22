@@ -18,6 +18,7 @@ A lightweight MVVM framework for Flutter that provides:
   - [TL;DR](#tldr)
 - [Core concepts](#core-concepts)
 - [Quick start](#quick-start)
+- [Scopes](#scopes)
 - [Members in detail](#members-in-detail)
 - [Dependencies between members](#dependencies-between-members)
 - [Accessing ViewModel and params in widgets](#accessing-viewmodel-and-params-in-widgets)
@@ -204,13 +205,114 @@ navigation members (and `hooks_riverpod` if you use riverpod).
     }
     ```
 
+## Scopes
+
+Scopes allow retrieving a ViewModel or its parameter by a supertype from anywhere in the subtree, not just by the exact type provided by the nearest `InheritedWidget`.
+
+How it works:
+
+- `ViewModelDispatcher` can optionally wrap its subtree with an internal `ViewModelScope` when `scope: true` is passed. See `packages/meovm/lib/src/core/dispatcher.dart`.
+- When you call `context.useVmOrNull<T>(scope: true)` or `context.useParamOrNull<T>(scope: true)`, meovm will look into the nearest active `ViewModelScope` and return the first instance that matches the requested supertype.
+- Retrieval by supertype is a relatively expensive operation; only enable it when you need it.
+
+Notes and limitations:
+
+- Supertype retrieval works only when the corresponding `ViewModelDispatcher` was created with `scope: true`.
+- You can still use the regular, fast path with exact-type retrieval via `context.useVM<ExactType>()` or `context.useParam<ExactType>()` without enabling scope.
+- Scopes are nestable: the nearest scope that satisfies the requested type wins.
+
+Retrieve ViewModel by a supertype:
+
+```dart
+abstract class SomeAbstractVm extends ViewModel<SomeParam?> {}
+
+final class SomeVm extends SomeAbstractVm {
+  @override
+  List<ViewModelMember> get members => [];
+
+  @override
+  void setDependencies(ViewModelDependencySetter depend) {}
+}
+
+class SomeScreen extends StatelessWidget {
+  const SomeScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ViewModelDispatcher<SomeVm, SomeParam?>(
+      factory: SomeVm.new,
+      param: null,
+      scope: true, // enable ViewModelScope for supertype retrieval
+      child: const SomeWidget(),
+    );
+  }
+}
+
+class SomeWidget extends StatelessWidget {
+  const SomeWidget({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    // Retrieves by supertype because scope: true is passed here and on dispatcher
+    final vm = context.useVmOrNull<SomeAbstractVm>(scope: true);
+    return Text(vm == null ? 'no vm' : 'vm ok');
+  }
+}
+```
+
+Retrieve Param by a supertype:
+
+```dart
+abstract base class SomeBaseParam extends ViewModelParameter {
+  const SomeBaseParam();
+  @override
+  bool shouldUpdateDependencies(ViewModelParameter? oldParam) => false;
+}
+
+final class SomeParam extends SomeBaseParam {
+  const SomeParam();
+}
+
+class ParamConsumer extends StatelessWidget {
+  const ParamConsumer({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final param = context.useParamOrNull<SomeBaseParam>(scope: true);
+    return Text(param == null ? 'no param' : 'param ok');
+  }
+}
+
+class ParamScopeScreen extends StatelessWidget {
+  const ParamScopeScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ViewModelDispatcher<SomeVm, SomeBaseParam?>(
+      factory: SomeVm.new,
+      param: const SomeParam(),
+      scope: true,
+      child: const ParamConsumer(),
+    );
+  }
+}
+```
+
+Performance tips:
+
+- Prefer exact-type retrieval (`useVM<Exact>()`, `useParam<Exact>()`) whenever possible.
+- Use `scope: true` selectively on dispatchers that must support supertype retrieval.
+- Combine with `listen: false` in `useVmOrNull`/`useParamOrNull` when you only need a one-time lookup.
+
 ## Members in detail
 
-Keep in mind:
+### Keep in mind
 
 1. All members are Listenable and can be used with ListenableBuilder.
 2. All members can be declared directly or via `ViewModel.member` factory (preferred). Refer to
    `ViewModelFactory` for more details.
+
+### Available members
 
 - ValueMember
     - Holds a single value. Updates notify listeners only when the value actually changes.

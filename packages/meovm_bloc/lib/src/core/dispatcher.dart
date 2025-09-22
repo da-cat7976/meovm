@@ -11,8 +11,9 @@ class BlocVmDispatcher<
   const BlocVmDispatcher({
     super.key,
     required this.factory,
-    required this.child,
     required this.param,
+    this.scope = false,
+    required this.child,
   });
 
   @override
@@ -23,6 +24,9 @@ class BlocVmDispatcher<
 
   @override
   final Param param;
+
+  @override
+  final bool scope;
 
   @override
   BlocVmDispatcherState<VM, Param> createState() {
