@@ -19,7 +19,6 @@ mixin ViewModelDispatcherBase<
   Param extends ViewModelParameter?
 >
     on StatefulWidget {
-
   /// Factory function that creates ViewModel instance. Typically, constructors
   /// of VMs itself.
   ViewModelFactory<VM, Param> get factory;
@@ -131,7 +130,7 @@ mixin ViewModelDispatcherStateBase<
 
     if (!widget.scope) return providers;
 
-    return ViewModelScope(
+    return ViewModelScope.expand<VM>(
       context: context,
       vm: _viewModel,
       param: param,
