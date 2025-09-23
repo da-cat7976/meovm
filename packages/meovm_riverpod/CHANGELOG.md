@@ -1,3 +1,7 @@
+## Unreleased
+### Fixed
+- Scoped VM retrieval order — [\#33](https://github.com/da-cat7976/meovm/issues/33)
+
 ## 1.1.0 - 2025-09-22
 ### Added
 - Custom linter:
