@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:meta/meta.dart';
 
 import 'api.dart';
 import 'dispatcher.dart';
@@ -128,27 +129,34 @@ extension ViewModelContext on BuildContext {
 }
 // coverage:ignore-end
 
+typedef _VMParamPair<
+  VM extends ViewModelLifecycle,
+  Param extends ViewModelParameter?
+> = ({VM vm, Param param});
+
 class ViewModelScope extends InheritedWidget {
   const ViewModelScope._({
     required super.child,
-    required Map<ViewModelLifecycle, ViewModelParameter?> vms,
+    required Map<Type, _VMParamPair> vms,
   }) : _vms = vms;
 
-  factory ViewModelScope({
+  @factory
+  @internal
+  static ViewModelScope expand<VM extends ViewModelLifecycle>({
     required BuildContext context,
-    required ViewModelLifecycle vm,
+    required VM vm,
     required ViewModelParameter? param,
     required Widget child,
   }) {
     final parent = context.dependOnInheritedWidgetOfExactType<ViewModelScope>();
 
     return ViewModelScope._(
-      vms: {...?parent?._vms, vm: param},
-      child: child, // fmt
+      vms: {...?parent?._vms, VM: (vm: vm, param: param)},
+      child: child,
     );
   }
 
-  final Map<ViewModelLifecycle, ViewModelParameter?> _vms;
+  final Map<Type, _VMParamPair> _vms;
 
   @override
   bool updateShouldNotify(covariant ViewModelScope oldWidget) {
@@ -158,7 +166,10 @@ class ViewModelScope extends InheritedWidget {
   }
 
   VM? getVm<VM extends ViewModelLifecycle>() {
-    for (final vm in _vms.keys) {
+    final pair = _vms[VM];
+    if (pair is _VMParamPair<VM, ViewModelParameter?>) return pair.vm;
+
+    for (final (:vm, param: _) in _vms.values) {
       if (vm is VM) return vm;
     }
 
@@ -166,7 +177,7 @@ class ViewModelScope extends InheritedWidget {
   }
 
   Param? getParam<Param extends ViewModelParameter>() {
-    for (final param in _vms.values) {
+    for (final (vm: _, :param) in _vms.values) {
       if (param is Param) return param;
     }
 

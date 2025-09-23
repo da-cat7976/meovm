@@ -16,6 +16,7 @@ class ScopeRetrievalTests {
       _paramSupertypeRetrievalWithScope();
       _paramSupertypeRetrievalWithoutDispatcherScope();
       _nestedScopesRetrieval();
+      _sameTypeNearestScopedRetrieval();
     });
   }
 
@@ -203,6 +204,38 @@ class ScopeRetrievalTests {
       expect(find.text('_ConcreteParamB'), findsOneWidget);
     });
   }
+
+  void _sameTypeNearestScopedRetrieval() {
+    testWidgets('Nearest scoped VM is used when same VM type is nested', (tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: ViewModelDispatcher<SomeVm, SomeParam>(
+            factory: SomeVm.new,
+            param: const SomeParam(1),
+            scope: true,
+            child: ViewModelDispatcher<SomeVm, SomeParam>(
+              factory: SomeVm.new,
+              param: const SomeParam(2),
+              scope: true,
+              child: Builder(
+                builder: (context) {
+                  final vm = context.useVM<SomeVm>(scope: true);
+                  return Text(
+                    '${vm.value.data}',
+                    key: const ValueKey('scoped_value_result'),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byKey(const ValueKey('scoped_value_result')), findsOneWidget);
+      expect(find.text('2'), findsOneWidget);
+    });
+  }
 }
 
 class _ScopedHostWidget extends StatelessWidget {
@@ -303,4 +336,25 @@ abstract base class _BaseParamB extends ViewModelParameter {
 
 final class _ConcreteParamB extends _BaseParamB {
   const _ConcreteParamB();
+}
+
+// --- Same-type nested scope test helpers ---
+
+final class SomeParam extends ViewModelParameter {
+  const SomeParam(this.v);
+
+  final int v;
+
+  @override
+  bool shouldUpdateDependencies(ViewModelParameter? oldParam) => true;
+}
+
+class SomeVm extends ViewModel<SomeParam> {
+  late final value = member.value<int>(resolver: (_) => param.v);
+
+  @override
+  List<ViewModelMember> get members => [value];
+
+  @override
+  void setDependencies(ViewModelDependencySetter depend) {}
 }
