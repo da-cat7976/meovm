@@ -10,7 +10,7 @@ environment:
   sdk: ^3.9.2
 
 dependencies:
-  analyzer: ^7.6.0
+  analyzer: ^8.4.0
   analyzer_plugin: ^0.13.4
   custom_lint_builder: ^0.8.0
   meovm_api: ^1.0.1
