@@ -1,4 +1,8 @@
-## Unreleased
+## 1.1.2 - 2025-12-09
+### Fixed
+- Updated build & source\_gen versions to actual
+
+## 1.1.1 - 2025-12-09
 ### Fixed
 - Scoped VM retrieval order — [\#33](https://github.com/da-cat7976/meovm/issues/33)
 
