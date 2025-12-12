@@ -1,3 +1,7 @@
+## 1.1.3 - 2025-12-12
+### Fixed
+- RiverpodActionGroup initialization (#37)
+
 ## 1.1.2 - 2025-12-09
 ### Fixed
 - Updated build & source\_gen versions to actual
