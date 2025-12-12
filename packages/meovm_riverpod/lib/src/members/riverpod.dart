@@ -6,8 +6,7 @@ import 'package:meta/meta.dart';
 
 typedef RiverpodDataMemberResolver<T> = T Function(WidgetRef ref, T? data);
 
-typedef RiverpodActionGroupResolver<Group, State> =
-    ({Group group, State state}) Function(WidgetRef ref, State? data);
+typedef RiverpodActionGroupResolver<Group, State> = ({Group group, State state}) Function(WidgetRef ref, State? data);
 
 abstract class RiverpodMember<T> extends UpdateNotifierMember<T> {
   RiverpodMember({super.debugName, super.frozen});
@@ -211,8 +210,7 @@ class RiverpodActionGroup<Group, State> extends RiverpodMember<State> {
       debugName,
       node.value?.toString(),
       quoted: false,
-      description:
-          'Riverpod action group controlled by ${notifier.runtimeType}',
+      description: 'Riverpod action group controlled by $Group',
     );
   }
 }
