@@ -1,7 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-typedef MeovmErrorHandlerListener =
-    void Function(Object error, StackTrace stackTrace);
+typedef MeovmErrorHandlerListener = void Function(
+  Object error,
+  StackTrace stackTrace,
+);
 
 mixin MeovmErrorHandler<State> on BlocBase<State> {
   final List<MeovmErrorHandlerListener> _errorListeners = [];

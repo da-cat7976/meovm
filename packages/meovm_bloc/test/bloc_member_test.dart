@@ -92,7 +92,9 @@ void main() {
       expect(find.text('2'), findsOneWidget);
     });
 
-    testWidgets('captures errors and exposes hasError and error', (tester) async {
+    testWidgets('captures errors and exposes hasError and error', (
+      tester,
+    ) async {
       final cubit = _CounterCubit();
       final vm = _BlocMemberVm(cubit: cubit);
 

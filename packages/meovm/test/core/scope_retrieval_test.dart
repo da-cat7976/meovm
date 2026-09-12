@@ -21,7 +21,9 @@ class ScopeRetrievalTests {
   }
 
   void _supertypeRetrievalWithScope() {
-    testWidgets('Retrieves VM by supertype when dispatcher has scope: true', (tester) async {
+    testWidgets('Retrieves VM by supertype when dispatcher has scope: true', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         const Directionality(
           textDirection: TextDirection.ltr,
@@ -38,22 +40,30 @@ class ScopeRetrievalTests {
   }
 
   void _supertypeRetrievalWithoutDispatcherScope() {
-    testWidgets('Does not retrieve VM by supertype when dispatcher has scope: false', (tester) async {
-      await tester.pumpWidget(
-        const Directionality(
-          textDirection: TextDirection.ltr,
-          child: _ScopedHostWidget(scopeOnDispatcher: false),
-        ),
-      );
+    testWidgets(
+      'Does not retrieve VM by supertype when dispatcher has scope: false',
+      (tester) async {
+        await tester.pumpWidget(
+          const Directionality(
+            textDirection: TextDirection.ltr,
+            child: _ScopedHostWidget(scopeOnDispatcher: false),
+          ),
+        );
 
-      // Without ViewModelScope provided by dispatcher, supertype lookup should fail
-      expect(find.byKey(const ValueKey('with_scope_result')), findsOneWidget);
-      expect(find.text('null'), findsNWidgets(2)); // both no-scope and with-scope paths are null
-    });
+        // Without ViewModelScope provided by dispatcher, supertype lookup should fail
+        expect(find.byKey(const ValueKey('with_scope_result')), findsOneWidget);
+        expect(
+          find.text('null'),
+          findsNWidgets(2),
+        ); // both no-scope and with-scope paths are null
+      },
+    );
   }
 
   void _concreteRetrievalWithoutScope() {
-    testWidgets('Direct retrieval by concrete type works without scope', (tester) async {
+    testWidgets('Direct retrieval by concrete type works without scope', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -74,139 +84,186 @@ class ScopeRetrievalTests {
         ),
       );
 
-      expect(find.byKey(const ValueKey('concrete_type_result')), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('concrete_type_result')),
+        findsOneWidget,
+      );
       expect(find.text('_ConcreteVm'), findsOneWidget);
     });
   }
 
   void _paramSupertypeRetrievalWithScope() {
-    testWidgets('Retrieves Param by supertype when dispatcher has scope: true', (tester) async {
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: ViewModelDispatcher<_ConcreteVm, _BaseParam?>(
-            factory: _ConcreteVm.new,
-            param: _ConcreteParam(),
-            scope: true,
-            child: Builder(
-              builder: (context) {
-                final noScope = context.useParamOrNull<_BaseParam>(scope: false);
-                final withScope = context.useParamOrNull<_BaseParam>(scope: true);
-
-                return Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      noScope == null ? 'null' : 'not null',
-                      key: const ValueKey('param_no_scope_result'),
-                    ),
-                    Text(
-                      withScope == null ? 'null' : 'not null',
-                      key: const ValueKey('param_with_scope_result'),
-                    ),
-                  ],
-                );
-              },
-            ),
-          ),
-        ),
-      );
-
-      expect(find.byKey(const ValueKey('param_no_scope_result')), findsOneWidget);
-      expect(find.text('null'), findsOneWidget);
-
-      expect(find.byKey(const ValueKey('param_with_scope_result')), findsOneWidget);
-      expect(find.text('not null'), findsOneWidget);
-    });
-  }
-
-  void _paramSupertypeRetrievalWithoutDispatcherScope() {
-    testWidgets('Does not retrieve Param by supertype when dispatcher has scope: false', (tester) async {
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: ViewModelDispatcher<_ConcreteVm, _BaseParam?>(
-            factory: _ConcreteVm.new,
-            param: _ConcreteParam(),
-            scope: false,
-            child: Builder(
-              builder: (context) {
-                final noScope = context.useParamOrNull<_BaseParam>(scope: false);
-                final withScope = context.useParamOrNull<_BaseParam>(scope: true);
-
-                return Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      noScope == null ? 'null' : 'not null',
-                      key: const ValueKey('param_no_scope_result'),
-                    ),
-                    Text(
-                      withScope == null ? 'null' : 'not null',
-                      key: const ValueKey('param_with_scope_result'),
-                    ),
-                  ],
-                );
-              },
-            ),
-          ),
-        ),
-      );
-
-      expect(find.byKey(const ValueKey('param_with_scope_result')), findsOneWidget);
-      expect(find.text('null'), findsNWidgets(2));
-    });
-  }
-
-  void _nestedScopesRetrieval() {
-    testWidgets('Nested scopes retrieve correct VMs and Params from nearest scope', (tester) async {
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: ViewModelDispatcher<_ConcreteVmA, _BaseParamA?>(
-            factory: _ConcreteVmA.new,
-            param: _ConcreteParamA(),
-            scope: true,
-            child: ViewModelDispatcher<_ConcreteVmB, _BaseParamB?>(
-              factory: _ConcreteVmB.new,
-              param: _ConcreteParamB(),
+    testWidgets(
+      'Retrieves Param by supertype when dispatcher has scope: true',
+      (tester) async {
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: ViewModelDispatcher<_ConcreteVm, _BaseParam?>(
+              factory: _ConcreteVm.new,
+              param: _ConcreteParam(),
               scope: true,
               child: Builder(
                 builder: (context) {
-                  final vmA = context.useVmOrNull<_BaseVmA>(scope: true);
-                  final vmB = context.useVmOrNull<_BaseVmB>(scope: true);
-                  final paramA = context.useParamOrNull<_BaseParamA>(scope: true);
-                  final paramB = context.useParamOrNull<_BaseParamB>(scope: true);
+                  final noScope = context.useParamOrNull<_BaseParam>(
+                    scope: false,
+                  );
+                  final withScope = context.useParamOrNull<_BaseParam>(
+                    scope: true,
+                  );
 
                   return Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(vmA.runtimeType.toString(), key: const ValueKey('nested_vm_a')),
-                      Text(vmB.runtimeType.toString(), key: const ValueKey('nested_vm_b')),
-                      Text(paramA.runtimeType.toString(), key: const ValueKey('nested_param_a')),
-                      Text(paramB.runtimeType.toString(), key: const ValueKey('nested_param_b')),
+                      Text(
+                        noScope == null ? 'null' : 'not null',
+                        key: const ValueKey('param_no_scope_result'),
+                      ),
+                      Text(
+                        withScope == null ? 'null' : 'not null',
+                        key: const ValueKey('param_with_scope_result'),
+                      ),
                     ],
                   );
                 },
               ),
             ),
           ),
-        ),
-      );
+        );
 
-      expect(find.byKey(const ValueKey('nested_vm_a')), findsOneWidget);
-      expect(find.text('_ConcreteVmA'), findsOneWidget);
-      expect(find.byKey(const ValueKey('nested_vm_b')), findsOneWidget);
-      expect(find.text('_ConcreteVmB'), findsOneWidget);
-      expect(find.byKey(const ValueKey('nested_param_a')), findsOneWidget);
-      expect(find.text('_ConcreteParamA'), findsOneWidget);
-      expect(find.byKey(const ValueKey('nested_param_b')), findsOneWidget);
-      expect(find.text('_ConcreteParamB'), findsOneWidget);
-    });
+        expect(
+          find.byKey(const ValueKey('param_no_scope_result')),
+          findsOneWidget,
+        );
+        expect(find.text('null'), findsOneWidget);
+
+        expect(
+          find.byKey(const ValueKey('param_with_scope_result')),
+          findsOneWidget,
+        );
+        expect(find.text('not null'), findsOneWidget);
+      },
+    );
+  }
+
+  void _paramSupertypeRetrievalWithoutDispatcherScope() {
+    testWidgets(
+      'Does not retrieve Param by supertype when dispatcher has scope: false',
+      (tester) async {
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: ViewModelDispatcher<_ConcreteVm, _BaseParam?>(
+              factory: _ConcreteVm.new,
+              param: _ConcreteParam(),
+              scope: false,
+              child: Builder(
+                builder: (context) {
+                  final noScope = context.useParamOrNull<_BaseParam>(
+                    scope: false,
+                  );
+                  final withScope = context.useParamOrNull<_BaseParam>(
+                    scope: true,
+                  );
+
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        noScope == null ? 'null' : 'not null',
+                        key: const ValueKey('param_no_scope_result'),
+                      ),
+                      Text(
+                        withScope == null ? 'null' : 'not null',
+                        key: const ValueKey('param_with_scope_result'),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+
+        expect(
+          find.byKey(const ValueKey('param_with_scope_result')),
+          findsOneWidget,
+        );
+        expect(find.text('null'), findsNWidgets(2));
+      },
+    );
+  }
+
+  void _nestedScopesRetrieval() {
+    testWidgets(
+      'Nested scopes retrieve correct VMs and Params from nearest scope',
+      (tester) async {
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: ViewModelDispatcher<_ConcreteVmA, _BaseParamA?>(
+              factory: _ConcreteVmA.new,
+              param: _ConcreteParamA(),
+              scope: true,
+              child: ViewModelDispatcher<_ConcreteVmB, _BaseParamB?>(
+                factory: _ConcreteVmB.new,
+                param: _ConcreteParamB(),
+                scope: true,
+                child: Builder(
+                  builder: (context) {
+                    final vmA = context.useVmOrNull<_BaseVmA>(scope: true);
+                    final vmB = context.useVmOrNull<_BaseVmB>(scope: true);
+                    final paramA = context.useParamOrNull<_BaseParamA>(
+                      scope: true,
+                    );
+                    final paramB = context.useParamOrNull<_BaseParamB>(
+                      scope: true,
+                    );
+
+                    return Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          vmA.runtimeType.toString(),
+                          key: const ValueKey('nested_vm_a'),
+                        ),
+                        Text(
+                          vmB.runtimeType.toString(),
+                          key: const ValueKey('nested_vm_b'),
+                        ),
+                        Text(
+                          paramA.runtimeType.toString(),
+                          key: const ValueKey('nested_param_a'),
+                        ),
+                        Text(
+                          paramB.runtimeType.toString(),
+                          key: const ValueKey('nested_param_b'),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        );
+
+        expect(find.byKey(const ValueKey('nested_vm_a')), findsOneWidget);
+        expect(find.text('_ConcreteVmA'), findsOneWidget);
+        expect(find.byKey(const ValueKey('nested_vm_b')), findsOneWidget);
+        expect(find.text('_ConcreteVmB'), findsOneWidget);
+        expect(find.byKey(const ValueKey('nested_param_a')), findsOneWidget);
+        expect(find.text('_ConcreteParamA'), findsOneWidget);
+        expect(find.byKey(const ValueKey('nested_param_b')), findsOneWidget);
+        expect(find.text('_ConcreteParamB'), findsOneWidget);
+      },
+    );
   }
 
   void _sameTypeNearestScopedRetrieval() {
-    testWidgets('Nearest scoped VM is used when same VM type is nested', (tester) async {
+    testWidgets('Nearest scoped VM is used when same VM type is nested', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,

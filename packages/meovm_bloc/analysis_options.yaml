@@ -1,4 +1,6 @@
+analyzer:
+  exclude:
+    - build/**
 include:
   - package:flutter_lints/flutter.yaml
-  - package:bloc_lint/recommended.yaml
   - ../../analysis_options.yaml

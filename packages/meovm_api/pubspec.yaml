@@ -5,12 +5,12 @@ repository: https://github.com/da-cat7976/meovm
 issue_tracker: https://github.com/da-cat7976/meovm/issues
 
 environment:
-  sdk: ^3.9.0
+  sdk: ^3.13.0
 
 resolution: workspace
 
 dependencies:
-  meta: ^1.16.0
+  meta: ^1.19.0
 
 dev_dependencies:
-  lints: ^6.0.0
+  lints: ^6.1.0

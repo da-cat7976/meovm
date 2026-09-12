@@ -4,13 +4,13 @@ publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.9.2
+  sdk: ^3.13.0
 
 dependencies:
   flutter:
     sdk: flutter
 
-  cupertino_icons: ^1.0.8
+  cupertino_icons: ^1.0.9
   meovm:
   meovm_api:
 
@@ -19,10 +19,9 @@ dev_dependencies:
     sdk: flutter
 
   flutter_lints: ^6.0.0
-  build_runner: ^2.7.1
+  build_runner: ^2.16.1
   meovm_gen:
   meovm_lint:
-  custom_lint: ^0.8.0
 
 dependency_overrides:
   meovm:

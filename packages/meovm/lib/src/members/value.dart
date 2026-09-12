@@ -420,3 +420,4 @@ class SetMember<T> extends BuildableViewModelMember
   DiagnosticsNode toDiagnosticsNode() =>
       IterableProperty(debugName, _data, ifNull: '<non ready>');
 }
+// ignore_for_file: prefer_initializing_formals

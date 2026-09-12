@@ -1,4 +1,3 @@
-// ignore_for_file: meovm_external_modification
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meovm/meovm.dart';
@@ -37,7 +36,9 @@ class FlutterMembersTests {
   }
 
   void _editableTextMember() {
-    testWidgets('EditableTextMember updates UI when text changes', (tester) async {
+    testWidgets('EditableTextMember updates UI when text changes', (
+      tester,
+    ) async {
       final vm = _EditableTextVm();
 
       await tester.pumpWidget(
@@ -75,7 +76,9 @@ class FlutterMembersTests {
   }
 
   void _animationMember() {
-    testWidgets('AnimationMember rebuilds when controller value changes', (tester) async {
+    testWidgets('AnimationMember rebuilds when controller value changes', (
+      tester,
+    ) async {
       final vm = _AnimationMemberVm();
 
       await tester.pumpWidget(
@@ -113,7 +116,9 @@ class FlutterMembersTests {
   }
 
   void _focusMember() {
-    testWidgets('FocusMember notifies and UI updates on focus change', (tester) async {
+    testWidgets('FocusMember notifies and UI updates on focus change', (
+      tester,
+    ) async {
       final vm = _FocusMemberVm();
 
       await tester.pumpWidget(
@@ -162,7 +167,9 @@ class FlutterMembersTests {
   }
 
   void _tabMember() {
-    testWidgets('TabMember swaps controller on update and keeps listeners', (tester) async {
+    testWidgets('TabMember swaps controller on update and keeps listeners', (
+      tester,
+    ) async {
       final vm = _TabMemberVm();
 
       await tester.pumpWidget(
@@ -225,7 +232,9 @@ class FlutterMembersTests {
   }
 
   void _customChangeNotifierMember() {
-    testWidgets('CustomChangeNotifierMember rebuilds on notifyListeners', (tester) async {
+    testWidgets('CustomChangeNotifierMember rebuilds on notifyListeners', (
+      tester,
+    ) async {
       final vm = _CustomNotifierVm();
 
       await tester.pumpWidget(
@@ -270,7 +279,8 @@ class _EditableTextVm extends ViewModel {
 
 class _AnimationMemberVm extends ViewModel {
   late final animation = AnimationMember(
-    initController: () => AnimationController(vsync: owner, lowerBound: 0, upperBound: 1),
+    initController: () =>
+        AnimationController(vsync: owner, lowerBound: 0, upperBound: 1),
   );
 
   @override
@@ -305,3 +315,4 @@ class _TabMemberVm extends ViewModel {
     depend(tabsCount, tabs);
   }
 }
+// ignore_for_file: meovm_lint/meovm_external_modification

@@ -1,4 +1,3 @@
-// ignore_for_file: meovm_external_modification
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -67,7 +66,9 @@ class ValueMembersTests {
   }
 
   void _listMemberMutations() {
-    testWidgets('ListMember add/remove updates UI and dependents', (tester) async {
+    testWidgets('ListMember add/remove updates UI and dependents', (
+      tester,
+    ) async {
       final vm = _ListMemberVm();
 
       await tester.pumpWidget(
@@ -121,7 +122,9 @@ class ValueMembersTests {
   }
 
   void _setMemberMutations() {
-    testWidgets('SetMember add/remove updates UI and dependents', (tester) async {
+    testWidgets('SetMember add/remove updates UI and dependents', (
+      tester,
+    ) async {
       final vm = _SetMemberVm();
 
       await tester.pumpWidget(
@@ -145,10 +148,8 @@ class ValueMembersTests {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     set.build(
-                      builder: (_, _) => Text(
-                        sortedSetString(),
-                        key: const ValueKey('set'),
-                      ),
+                      builder: (_, _) =>
+                          Text(sortedSetString(), key: const ValueKey('set')),
                     ),
                     length.build(
                       builder: (_, _) => Text(

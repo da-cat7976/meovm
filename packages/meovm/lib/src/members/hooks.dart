@@ -45,11 +45,9 @@ class ViewModelMemberListenerHookState
   }
 
   void _onMemberChanged() {
-    Future(
-      () {
-        if (!context.mounted) return;
-        hook.listener(context);
-      },
-    );
+    Future(() {
+      if (!context.mounted) return;
+      hook.listener(context);
+    });
   }
 }

@@ -7,14 +7,13 @@ issue_tracker: https://github.com/da-cat7976/meovm/issues
 resolution: workspace
 
 environment:
-  sdk: ^3.9.2
+  sdk: ^3.13.0
 
 dependencies:
-  analyzer: ^8.4.0
-  analyzer_plugin: ^0.13.4
-  custom_lint_builder: ^0.8.0
-  meovm_api: ^1.0.1
+  analysis_server_plugin: 0.3.18
+  analyzer: ^13.3.0
+  source_gen: ^4.2.4
 
 dev_dependencies:
-  lints: ^6.0.0
-  test: ^1.25.6
+  lints: ^6.1.0
+  test: ^1.31.1

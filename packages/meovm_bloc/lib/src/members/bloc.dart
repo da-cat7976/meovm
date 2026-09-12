@@ -120,3 +120,4 @@ final class BlocMemberError {
 
   const BlocMemberError({required this.error, required this.stackTrace});
 }
+// ignore_for_file: prefer_initializing_formals

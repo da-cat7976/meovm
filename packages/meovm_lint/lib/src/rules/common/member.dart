@@ -1,65 +1,84 @@
+import 'package:analyzer/analysis_rule/analysis_rule.dart';
+import 'package:analyzer/analysis_rule/rule_context.dart';
+import 'package:analyzer/analysis_rule/rule_visitor_registry.dart';
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/token.dart';
-import 'package:analyzer/dart/element/element2.dart';
-import 'package:analyzer/error/listener.dart';
-import 'package:custom_lint_builder/custom_lint_builder.dart';
+import 'package:analyzer/dart/ast/visitor.dart';
+import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/error/error.dart';
 
-abstract class MemberAccessRule extends DartLintRule {
-  MemberAccessRule({required super.code});
+abstract class MemberAccessRule extends AnalysisRule {
+  MemberAccessRule({required LintCode code, required super.description})
+    : _code = code,
+      super(name: code.lowerCaseName);
+
+  final LintCode _code;
 
   @override
-  void run(CustomLintResolver resolver, ErrorReporter reporter, CustomLintContext context) {
-    context.registry
-      ..addMethodInvocation((node) {
-        final element = node.methodName.element;
-        final shouldWarn = checkElement(element, node);
-        if (!shouldWarn) return;
+  LintCode get diagnosticCode => _code;
 
-        reporter.atNode(node.methodName, code);
-      })
-      ..addPropertyAccess((node) {
-        final element = node.propertyName.element;
-        final shouldWarn = switch (element) {
-          GetterElement(isSynthetic: false) => checkElement(element, node),
-          GetterElement(variable3: final PropertyInducingElement2 variable) =>
-              checkElement(variable, node),
-          _ => false,
-        };
-        if (!shouldWarn) return;
-
-        reporter.atNode(node.propertyName, code);
-      })
-      ..addPrefixedIdentifier((node) {
-        final element = node.element;
-        final shouldWarn = checkElement(element, node);
-        if (!shouldWarn) return;
-
-        reporter.atNode(node, code);
-      })
-      ..addAssignmentExpression((node) {
-        // Handle setters and compound assignments, e.g.:
-        //   obj.prop = value;           => use writeElement2 (setter)
-        //   obj.prop += value;          => use element (operator method)
-        final isSimpleEq = node.operator.type == TokenType.EQ;
-        final element = isSimpleEq ? node.writeElement2 : node.element;
-
-        final shouldWarn = checkElement(element, node);
-        if (!shouldWarn) return;
-
-        // Report on the identifier being assigned to, when available.
-        final lhs = node.leftHandSide;
-        SimpleIdentifier? id;
-        if (lhs is PropertyAccess) {
-          id = lhs.propertyName;
-        } else if (lhs is PrefixedIdentifier) {
-          id = lhs.identifier;
-        } else if (lhs is SimpleIdentifier) {
-          id = lhs;
-        }
-
-        reporter.atNode(id ?? node, code);
-      });
+  @override
+  void registerNodeProcessors(
+    RuleVisitorRegistry registry,
+    RuleContext context,
+  ) {
+    final visitor = _MemberAccessVisitor(this);
+    registry
+      ..addMethodInvocation(this, visitor)
+      ..addPropertyAccess(this, visitor)
+      ..addPrefixedIdentifier(this, visitor)
+      ..addAssignmentExpression(this, visitor);
   }
 
-  bool checkElement(Element2? element, AstNode node);
+  bool checkElement(Element? element, AstNode node);
+}
+
+class _MemberAccessVisitor extends SimpleAstVisitor<void> {
+  _MemberAccessVisitor(this.rule);
+
+  final MemberAccessRule rule;
+
+  @override
+  void visitMethodInvocation(MethodInvocation node) {
+    if (rule.checkElement(node.methodName.element, node)) {
+      rule.reportAtNode(node.methodName);
+    }
+  }
+
+  @override
+  void visitPropertyAccess(PropertyAccess node) {
+    final element = node.propertyName.element;
+    final shouldWarn = switch (element) {
+      GetterElement(isOriginDeclaration: true) => rule.checkElement(
+        element,
+        node,
+      ),
+      GetterElement(variable: final PropertyInducingElement variable) =>
+        rule.checkElement(variable, node),
+      _ => false,
+    };
+    if (shouldWarn) rule.reportAtNode(node.propertyName);
+  }
+
+  @override
+  void visitPrefixedIdentifier(PrefixedIdentifier node) {
+    if (rule.checkElement(node.element, node)) rule.reportAtNode(node);
+  }
+
+  @override
+  void visitAssignmentExpression(AssignmentExpression node) {
+    final element = node.operator.type == TokenType.EQ
+        ? node.writeElement
+        : node.element;
+    if (!rule.checkElement(element, node)) return;
+
+    final lhs = node.leftHandSide;
+    final identifier = switch (lhs) {
+      PropertyAccess(:final propertyName) => propertyName,
+      PrefixedIdentifier(:final identifier) => identifier,
+      SimpleIdentifier() => lhs,
+      _ => null,
+    };
+    rule.reportAtNode(identifier ?? node);
+  }
 }

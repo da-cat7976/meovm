@@ -6,8 +6,10 @@ import 'package:meovm/src/members/utils.dart';
 
 typedef StreamMemberResolver<T> = Stream<T> Function();
 
-typedef StreamMemberErrorListener =
-    void Function(Object error, StackTrace stacktrace);
+typedef StreamMemberErrorListener = void Function(
+  Object error,
+  StackTrace stacktrace,
+);
 
 typedef StreamMemberDoneListener = void Function();
 
