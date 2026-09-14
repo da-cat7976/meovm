@@ -55,7 +55,6 @@ class ParamMixinGeneratorHelper {
   Iterable<FieldElement> _getChecked(ClassElement element) sync* {
     final typeSystem = element.library.typeSystem;
     for (final field in element.fields) {
-      if (field.isOriginGetterSetter) continue;
       if (_isAssignableFromTypeOrBound(_vmChecker, field.type, typeSystem) ||
           _isAssignableFromTypeOrBound(
             _memberChecker,

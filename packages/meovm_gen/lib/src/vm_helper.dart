@@ -110,7 +110,7 @@ class VmMixinGeneratorHelper {
     InterfaceType interface,
     TypeSystem typeSystem,
   ) sync* {
-    for (final field in _fieldsOf(interface)) {
+    for (final field in _fieldsOf(interface, includeGetterProperties: true)) {
       final type = field.type;
 
       if (_isNonNullableAssignable(_memberChecker, type, typeSystem)) {
@@ -151,10 +151,14 @@ class VmMixinGeneratorHelper {
     }
   }
 
-  Iterable<FieldElement> _fieldsOf(InterfaceType interface) sync* {
+  Iterable<FieldElement> _fieldsOf(
+    InterfaceType interface, {
+    bool includeGetterProperties = false,
+  }) sync* {
     for (final getter in interface.getters) {
       final variable = getter.variable;
-      if (variable is FieldElement && !variable.isOriginGetterSetter) {
+      if (variable is FieldElement &&
+          (includeGetterProperties || !variable.isOriginGetterSetter)) {
         yield variable;
       }
     }
@@ -297,7 +301,8 @@ class VmMixinGeneratorHelper {
     if (member.isAnonymous) {
       return annotation.dependOn == Symbol(member.member.name!);
     }
-    return annotation.from == Symbol(member.vm!.name!);
+    return annotation.from == Symbol(member.vm!.name!) &&
+        annotation.dependOn == Symbol(member.member.name!);
   }
 
   Never _throwSourceNotFound(MeovmDepend annotation, FieldElement target) {
@@ -455,8 +460,12 @@ class _ExternalMemberInfo {
 
   bool get isAnonymous => vm == null;
 
-  bool isSame(Element? other) {
-    return other is FieldElement && member.baseElement == other.baseElement;
+  bool isSame(Element? other, FieldElement? receiver) {
+    if (other is! FieldElement || member.baseElement != other.baseElement) {
+      return false;
+    }
+    if (isAnonymous) return true;
+    return receiver != null && vm!.baseElement == receiver.baseElement;
   }
 
   @override
@@ -516,8 +525,9 @@ class _MemberDependenciesCollector extends RecursiveAstVisitor<void> {
       return;
     }
 
+    final receiver = _receiverFieldOf(node);
     final external = externalMembers.firstWhereOrNull(
-      (e) => e.isSame(element.variable),
+      (e) => e.isSame(element.variable, receiver),
     );
     if (external != null) {
       _external.add(external);
@@ -525,6 +535,29 @@ class _MemberDependenciesCollector extends RecursiveAstVisitor<void> {
     }
 
     super.visitSimpleIdentifier(node);
+  }
+
+  FieldElement? _receiverFieldOf(SimpleIdentifier node) {
+    final parent = node.parent;
+    final receiver = switch (parent) {
+      PrefixedIdentifier() when identical(parent.identifier, node) =>
+        parent.prefix,
+      PropertyAccess() when identical(parent.propertyName, node) =>
+        parent.realTarget,
+      _ => null,
+    };
+    if (receiver == null) return null;
+
+    final element = switch (receiver) {
+      SimpleIdentifier() => receiver.element,
+      PrefixedIdentifier() => receiver.identifier.element,
+      PropertyAccess() => receiver.propertyName.element,
+      _ => null,
+    };
+    if (element is! PropertyAccessorElement) return null;
+
+    final variable = element.variable;
+    return variable is FieldElement ? variable : null;
   }
 
   void _checkExecutableImplementation(ExecutableElement element) {
