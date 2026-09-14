@@ -1,6 +1,7 @@
 import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
+import 'package:analyzer/dart/element/type_system.dart';
 import 'package:build/build.dart';
 import 'package:code_builder/code_builder.dart';
 import 'package:dart_style/dart_style.dart';
@@ -52,20 +53,29 @@ class ParamMixinGeneratorHelper {
   }
 
   Iterable<FieldElement> _getChecked(ClassElement element) sync* {
+    final typeSystem = element.library.typeSystem;
     for (final field in element.fields) {
-      if (_isAssignableFromTypeOrBound(_vmChecker, field.type) ||
-          _isAssignableFromTypeOrBound(_memberChecker, field.type)) {
+      if (_isAssignableFromTypeOrBound(_vmChecker, field.type, typeSystem) ||
+          _isAssignableFromTypeOrBound(
+            _memberChecker,
+            field.type,
+            typeSystem,
+          )) {
         yield field;
       }
     }
   }
 
-  bool _isAssignableFromTypeOrBound(TypeChecker checker, DartType type) {
+  bool _isAssignableFromTypeOrBound(
+    TypeChecker checker,
+    DartType type,
+    TypeSystem typeSystem,
+  ) {
     if (checker.isAssignableFromType(type)) return true;
 
-    final interface = resolveInterfaceElement(type);
+    final interface = resolveInterfaceType(type, typeSystem);
     return interface != null &&
-        checker.isAssignableFromType(interface.thisType);
+        checker.isAssignableFromType(typeSystem.promoteToNonNull(interface));
   }
 
   Iterable<Method> _buildDefinitions(Iterable<FieldElement> members) sync* {

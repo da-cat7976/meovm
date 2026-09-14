@@ -4,6 +4,7 @@ import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:analyzer/dart/element/type.dart';
+import 'package:analyzer/dart/element/type_system.dart';
 import 'package:build/build.dart';
 import 'package:code_builder/code_builder.dart';
 import 'package:collection/collection.dart';
@@ -32,9 +33,10 @@ class VmMixinGeneratorHelper {
     );
     if (library is! ResolvedLibraryResult) return '';
 
-    final members = _getMembers(element).toList();
-    final inheritedMembers = _getInheritedMembers(element).toList();
-    final externalMembers = _getExternalMembers(element).toList();
+    final typeSystem = element.library.typeSystem;
+    final members = _getMembers(element, typeSystem).toList();
+    final inheritedMembers = _getInheritedMembers(element, typeSystem).toList();
+    final externalMembers = _getExternalMembers(element, typeSystem).toList();
 
     final dependencies = _getDependencies(
       library,
@@ -62,57 +64,63 @@ class VmMixinGeneratorHelper {
     return _formatter.format('${mixin.accept(emitter)}');
   }
 
-  Iterable<FieldElement> _getMembers(InterfaceElement element) sync* {
+  Iterable<FieldElement> _getMembers(
+    InterfaceElement element,
+    TypeSystem typeSystem,
+  ) sync* {
     for (final field in element.fields) {
-      if (_memberChecker.isAssignableFromType(field.type)) yield field;
+      if (_isNonNullableAssignable(_memberChecker, field.type, typeSystem)) {
+        yield field;
+      }
     }
   }
 
-  Iterable<FieldElement> _getInheritedMembers(InterfaceElement element) sync* {
+  Iterable<FieldElement> _getInheritedMembers(
+    InterfaceElement element,
+    TypeSystem typeSystem,
+  ) sync* {
     for (final type in element.allSupertypes) {
-      for (final field in type.element.fields) {
-        if (_memberChecker.isAssignableFromType(field.type)) yield field;
-      }
+      yield* _getMemberFields(type, typeSystem);
     }
   }
 
   Iterable<_ExternalMemberInfo> _getExternalMembers(
     InterfaceElement element,
+    TypeSystem typeSystem,
   ) sync* {
     final supertype = element.allSupertypes.firstWhereOrNull(
       (e) => _vmChecker.isExactlyType(e),
     );
     if (supertype is! InterfaceType) return;
 
-    final paramType = resolveInterfaceElement(
+    final paramType = resolveInterfaceType(
       supertype.typeArguments.firstOrNull,
+      typeSystem,
     );
-    if (paramType == null) return;
+    if (paramType == null || _isNullable(paramType)) return;
 
-    yield* _getExternalMembersFromExactly(paramType);
+    yield* _getExternalMembersFromExactly(paramType, typeSystem);
     for (final type in paramType.allSupertypes) {
-      yield* _getExternalMembersFromExactly(type.element);
+      yield* _getExternalMembersFromExactly(type, typeSystem);
     }
   }
 
   Iterable<_ExternalMemberInfo> _getExternalMembersFromExactly(
-    InterfaceElement element,
+    InterfaceType interface,
+    TypeSystem typeSystem,
   ) sync* {
-    for (final field in element.fields) {
+    for (final field in _fieldsOf(interface)) {
       final type = field.type;
 
-      if (_memberChecker.isAssignableFromType(type)) {
+      if (_isNonNullableAssignable(_memberChecker, type, typeSystem)) {
         yield _ExternalMemberInfo(field);
       }
 
-      final vmClass = resolveInterfaceElement(type);
-      if (vmClass != null &&
-          !_isPotentiallyNullable(type) &&
-          _vmChecker.isAssignableFromType(vmClass.thisType)) {
-        final members = [
-          ..._getMembers(vmClass),
-          ..._getInheritedMembers(vmClass),
-        ];
+      final vmType = resolveInterfaceType(type, typeSystem);
+      if (vmType != null &&
+          !_isNullable(vmType) &&
+          _vmChecker.isAssignableFromType(vmType)) {
+        final members = _getMemberFieldsWithSupertypes(vmType, typeSystem);
 
         for (final member in members) {
           yield _ExternalMemberInfo(member, vm: field);
@@ -121,18 +129,46 @@ class VmMixinGeneratorHelper {
     }
   }
 
-  bool _isPotentiallyNullable(
-    DartType type, [
-    Set<TypeParameterElement>? visited,
-  ]) {
-    if (type.nullabilitySuffix == NullabilitySuffix.question) return true;
-    if (type is! TypeParameterType) return false;
-
-    visited ??= {};
-    if (!visited.add(type.element)) return false;
-
-    return _isPotentiallyNullable(type.bound, visited);
+  Iterable<FieldElement> _getMemberFieldsWithSupertypes(
+    InterfaceType interface,
+    TypeSystem typeSystem,
+  ) sync* {
+    yield* _getMemberFields(interface, typeSystem);
+    for (final supertype in interface.allSupertypes) {
+      yield* _getMemberFields(supertype, typeSystem);
+    }
   }
+
+  Iterable<FieldElement> _getMemberFields(
+    InterfaceType interface,
+    TypeSystem typeSystem,
+  ) sync* {
+    for (final field in _fieldsOf(interface)) {
+      if (_isNonNullableAssignable(_memberChecker, field.type, typeSystem)) {
+        yield field;
+      }
+    }
+  }
+
+  Iterable<FieldElement> _fieldsOf(InterfaceType interface) sync* {
+    for (final getter in interface.getters) {
+      final variable = getter.variable;
+      if (variable is FieldElement) yield variable;
+    }
+  }
+
+  bool _isNonNullableAssignable(
+    TypeChecker checker,
+    DartType type,
+    TypeSystem typeSystem,
+  ) {
+    final resolved = resolveInterfaceType(type, typeSystem);
+    if (resolved == null || _isNullable(resolved)) return false;
+    return checker.isAssignableFromType(resolved);
+  }
+
+  bool _isNullable(DartType type) =>
+      type.nullabilitySuffix == NullabilitySuffix.question;
 
   Iterable<_DependencyPair> _getDependencies(
     ResolvedLibraryResult library,
