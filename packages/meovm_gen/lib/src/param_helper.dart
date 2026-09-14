@@ -1,5 +1,6 @@
 import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/type.dart';
 import 'package:build/build.dart';
 import 'package:code_builder/code_builder.dart';
 import 'package:dart_style/dart_style.dart';
@@ -52,14 +53,19 @@ class ParamMixinGeneratorHelper {
 
   Iterable<FieldElement> _getChecked(ClassElement element) sync* {
     for (final field in element.fields) {
-      if (_vmChecker.isAssignableFromType(field.type)) {
-        yield field;
-      }
-
-      if (_memberChecker.isAssignableFromType(field.type)) {
+      if (_isAssignableFromTypeOrBound(_vmChecker, field.type) ||
+          _isAssignableFromTypeOrBound(_memberChecker, field.type)) {
         yield field;
       }
     }
+  }
+
+  bool _isAssignableFromTypeOrBound(TypeChecker checker, DartType type) {
+    if (checker.isAssignableFromType(type)) return true;
+
+    final interface = resolveInterfaceElement(type);
+    return interface != null &&
+        checker.isAssignableFromType(interface.thisType);
   }
 
   Iterable<Method> _buildDefinitions(Iterable<FieldElement> members) sync* {

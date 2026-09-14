@@ -1,6 +1,7 @@
 import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/type.dart';
 import 'package:code_builder/code_builder.dart';
 
 Iterable<Reference> buildTypeParameters(
@@ -27,4 +28,17 @@ String typeParameterUsage(ClassElement element) {
   if (element.typeParameters.isEmpty) return '';
 
   return '<${element.typeParameters.map((parameter) => parameter.name).join(', ')}>';
+}
+
+InterfaceElement? resolveInterfaceElement(
+  DartType? type, [
+  Set<TypeParameterElement>? visited,
+]) {
+  if (type is InterfaceType) return type.element;
+  if (type is! TypeParameterType) return null;
+
+  visited ??= {};
+  if (!visited.add(type.element)) return null;
+
+  return resolveInterfaceElement(type.bound, visited);
 }

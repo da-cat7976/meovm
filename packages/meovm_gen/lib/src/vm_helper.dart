@@ -83,26 +83,15 @@ class VmMixinGeneratorHelper {
     );
     if (supertype is! InterfaceType) return;
 
-    final paramType = _interfaceElementOf(supertype.typeArguments.firstOrNull);
+    final paramType = resolveInterfaceElement(
+      supertype.typeArguments.firstOrNull,
+    );
     if (paramType == null) return;
 
     yield* _getExternalMembersFromExactly(paramType);
     for (final type in paramType.allSupertypes) {
       yield* _getExternalMembersFromExactly(type.element);
     }
-  }
-
-  InterfaceElement? _interfaceElementOf(
-    DartType? type, [
-    Set<TypeParameterElement>? visited,
-  ]) {
-    if (type is InterfaceType) return type.element;
-    if (type is! TypeParameterType) return null;
-
-    visited ??= {};
-    if (!visited.add(type.element)) return null;
-
-    return _interfaceElementOf(type.bound, visited);
   }
 
   Iterable<_ExternalMemberInfo> _getExternalMembersFromExactly(
@@ -115,10 +104,9 @@ class VmMixinGeneratorHelper {
         yield _ExternalMemberInfo(field);
       }
 
-      if (_vmChecker.isAssignableFromType(type)) {
-        final vmClass = type.element;
-        if (vmClass is! InterfaceElement) continue;
-
+      final vmClass = resolveInterfaceElement(type);
+      if (vmClass != null &&
+          _vmChecker.isAssignableFromType(vmClass.thisType)) {
         final members = [
           ..._getMembers(vmClass),
           ..._getInheritedMembers(vmClass),
@@ -463,7 +451,9 @@ class _MemberDependenciesCollector extends RecursiveAstVisitor<void> {
       return;
     }
 
-    final internal = members.firstWhereOrNull((e) => e == element.variable);
+    final internal = members.firstWhereOrNull(
+      (e) => e.baseElement == element.variable.baseElement,
+    );
     if (internal != null) {
       _internal.add(internal);
       return;
