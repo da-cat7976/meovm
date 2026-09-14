@@ -31,6 +31,19 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Generate code
+        shell: bash
+        run: |
+          set -euo pipefail
+          for package in \
+            packages/meovm \
+            packages/meovm/example \
+            packages/meovm_bloc/example \
+            packages/meovm_riverpod/example
+          do
+            (cd "$package" && dart run build_runner build)
+          done
+
       - name: Analyze
         run: dart analyze --fatal-infos
 
@@ -72,6 +85,19 @@ jobs:
 
       - name: Install dependencies
         run: flutter pub get
+
+      - name: Generate code
+        shell: bash
+        run: |
+          set -euo pipefail
+          for package in \
+            packages/meovm \
+            packages/meovm/example \
+            packages/meovm_bloc/example \
+            packages/meovm_riverpod/example
+          do
+            (cd "$package" && dart run build_runner build)
+          done
 
       - name: Verify tag and package versions
         shell: bash
