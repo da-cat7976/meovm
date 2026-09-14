@@ -14,6 +14,7 @@ A lightweight MVVM framework for Flutter that provides:
   - [TL;DR](#tldr)
 - [Core concepts](#core-concepts)
 - [Quick start](#quick-start)
+- [Generic ViewModels and parameters](#generic-viewmodels-and-parameters)
 - [Scopes](#scopes)
 - [Members in detail](#members-in-detail)
 - [Dependencies between members](#dependencies-between-members)
@@ -34,7 +35,7 @@ A lightweight MVVM framework for Flutter that provides:
 
     ```yaml
     plugins:
-      meovm_lint: ^1.1.3
+      meovm_lint: ^1.2.0
     ```
 
 3. Integrate with your state manager:
@@ -70,7 +71,7 @@ navigation members (and `hooks_riverpod` if you use riverpod).
 2. Following to `analysis_options.yaml`:
     ```yaml
     plugins:
-      meovm_lint: ^1.1.3
+      meovm_lint: ^1.2.0
     ```
 
 ## Core concepts
@@ -198,6 +199,33 @@ navigation members (and `hooks_riverpod` if you use riverpod).
       }
     }
     ```
+
+## Generic ViewModels and parameters
+
+Code generation supports generic ViewModels and parameters, including type bounds, nullable bounds,
+and dependencies reached through generic parameters:
+
+```dart
+@Meovm()
+final class ItemParam<T extends Object> extends ViewModelParameter
+    with _$ItemParam<T> {
+  const ItemParam(this.source);
+
+  @override
+  final ValueMember<T> source;
+}
+
+@Meovm()
+final class ItemVm<T extends Object, P extends ItemParam<T>>
+    extends ViewModel<P>
+    with _$ItemVm<T, P> {
+  @override
+  late final value = member.value<T>(resolver: (_) => param.source.data);
+}
+```
+
+Keep the generated mixin's type arguments in the `with` clause. Bounds may refer to imported,
+prefixed types and to other type parameters.
 
 ## Scopes
 

@@ -1,3 +1,11 @@
+## 1.2.0 - 2026-09-14
+### Added
+- Code generation for generic ViewModels and parameters, including bounded and nullable type
+  parameters (#44)
+
+### Fixed
+- Dependency discovery through generic, getter-backed, nested, and external member accessors (#44)
+
 ## 1.1.3 - 2025-12-12
 ### Fixed
 - RiverpodActionGroup initialization (#37)

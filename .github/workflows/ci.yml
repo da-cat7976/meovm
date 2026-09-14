@@ -71,7 +71,7 @@ jobs:
     environment: pub.dev
     permissions:
       id-token: write
-      contents: read
+      contents: write
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -152,3 +152,18 @@ jobs:
           do
             (cd "$package" && dart pub publish --force)
           done
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            echo "GitHub release $GITHUB_REF_NAME already exists"
+          else
+            gh release create "$GITHUB_REF_NAME" \
+              --verify-tag \
+              --generate-notes \
+              --title "$GITHUB_REF_NAME"
+          fi
