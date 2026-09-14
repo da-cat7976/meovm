@@ -69,6 +69,7 @@ class VmMixinGeneratorHelper {
     TypeSystem typeSystem,
   ) sync* {
     for (final field in element.fields) {
+      if (field.isOriginGetterSetter) continue;
       if (_isNonNullableAssignable(_memberChecker, field.type, typeSystem)) {
         yield field;
       }
@@ -153,7 +154,9 @@ class VmMixinGeneratorHelper {
   Iterable<FieldElement> _fieldsOf(InterfaceType interface) sync* {
     for (final getter in interface.getters) {
       final variable = getter.variable;
-      if (variable is FieldElement) yield variable;
+      if (variable is FieldElement && !variable.isOriginGetterSetter) {
+        yield variable;
+      }
     }
   }
 
@@ -180,7 +183,7 @@ class VmMixinGeneratorHelper {
 
     for (final member in members) {
       final initializer = _initializerOf(library, member);
-      if (initializer == null) return;
+      if (initializer == null) continue;
 
       final discovered = _collectDependencies(
         library: library,
@@ -497,7 +500,10 @@ class _MemberDependenciesCollector extends RecursiveAstVisitor<void> {
     }
 
     final type = element.returnType;
-    if (!_memberChecker.isAssignableFromType(type)) {
+    final resolvedType = resolveInterfaceType(type, library.element.typeSystem);
+    if (resolvedType == null ||
+        resolvedType.nullabilitySuffix == NullabilitySuffix.question ||
+        !_memberChecker.isAssignableFromType(resolvedType)) {
       _checkExecutableImplementation(element);
       return;
     }

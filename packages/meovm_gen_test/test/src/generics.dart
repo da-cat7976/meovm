@@ -6,6 +6,8 @@ import 'models.dart' as models;
 
 part 'golden/generic_param.dart';
 part 'golden/generic_vm.dart';
+part 'golden/generic_member_bound_vm.dart';
+part 'golden/generic_member_getter_vm.dart';
 part 'golden/instantiated_generic_vm.dart';
 part 'golden/nullable_generic_param_vm.dart';
 part 'golden/nullable_generic_vm.dart';
@@ -75,6 +77,31 @@ class InstantiatedGenericVm<
     with _$InstantiatedGenericVm<P> {
   @override
   late final value = ValueMember<int>(resolver: (_) => param.member.data);
+}
+
+@ShouldGenerateFile('golden/generic_member_bound_vm.dart', partOfCurrent: true)
+@Meovm()
+class GenericMemberBoundVm<
+  M extends ViewModelMember,
+  P extends InstantiatedGenericParam<M>
+>
+    extends ViewModel<P>
+    with _$GenericMemberBoundVm<M, P> {
+  @override
+  late final value = ValueMember<M>(resolver: (_) => param.member);
+}
+
+@ShouldGenerateFile('golden/generic_member_getter_vm.dart', partOfCurrent: true)
+@Meovm()
+class GenericMemberGetterVm<M extends ViewModelMember> extends ViewModel
+    with _$GenericMemberGetterVm<M> {
+  @override
+  late final source = ValueMember<int>();
+
+  M get sourceAlias => source as M;
+
+  @override
+  late final value = ValueMember<int>(resolver: (_) => source.data);
 }
 
 final class NullableParam extends ViewModelParameter {
