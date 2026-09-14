@@ -95,7 +95,9 @@ final class MultipleNestedParam extends ViewModelParameter {
 class MultipleNestedVm extends ViewModel<MultipleNestedParam>
     with _$MultipleNestedVm {
   @override
-  late final value = ValueMember<int>(resolver: (_) => param.second.value.data);
+  late final value = ValueMember<int>(
+    resolver: (_) => (param.second).value.data,
+  );
 }
 
 @ShouldGenerateFile('golden/manual_external_vm.dart', partOfCurrent: true)

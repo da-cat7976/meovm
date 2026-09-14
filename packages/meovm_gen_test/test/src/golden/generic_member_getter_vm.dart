@@ -3,7 +3,7 @@ part of '../generics.dart';
 mixin _$GenericMemberGetterVm<M extends ViewModelMember>
     on ViewModel<ViewModelParameter?> {
   ValueMember<int> get source;
-  ValueMember<int> get value;
+  ValueMember<M> get value;
   @override
   List<ViewModelMember> get members {
     return [...super.members, source, value];

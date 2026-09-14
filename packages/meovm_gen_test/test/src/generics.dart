@@ -101,7 +101,7 @@ class GenericMemberGetterVm<M extends ViewModelMember> extends ViewModel
   M get sourceAlias => source as M;
 
   @override
-  late final value = ValueMember<int>(resolver: (_) => source.data);
+  late final value = ValueMember<M>(resolver: (_) => sourceAlias);
 }
 
 final class NullableParam extends ViewModelParameter {

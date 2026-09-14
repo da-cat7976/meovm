@@ -6,7 +6,7 @@ import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:analyzer/dart/element/type_system.dart';
 import 'package:build/build.dart';
-import 'package:code_builder/code_builder.dart';
+import 'package:code_builder/code_builder.dart' hide ParenthesizedExpression;
 import 'package:collection/collection.dart';
 import 'package:dart_style/dart_style.dart';
 import 'package:meovm_api/meovm_api.dart';
@@ -546,19 +546,24 @@ class _MemberDependenciesCollector extends RecursiveAstVisitor<void> {
       return;
     }
 
-    super.visitSimpleIdentifier(node);
+    _checkExecutableImplementation(element);
   }
 
   FieldElement? _receiverFieldOf(SimpleIdentifier node) {
     final parent = node.parent;
-    final receiver = switch (parent) {
+    final rawReceiver = switch (parent) {
       PrefixedIdentifier() when identical(parent.identifier, node) =>
         parent.prefix,
       PropertyAccess() when identical(parent.propertyName, node) =>
         parent.realTarget,
       _ => null,
     };
-    if (receiver == null) return null;
+    if (rawReceiver == null) return null;
+
+    AstNode receiver = rawReceiver;
+    while (receiver is ParenthesizedExpression) {
+      receiver = receiver.expression;
+    }
 
     final element = switch (receiver) {
       SimpleIdentifier() => receiver.element,
