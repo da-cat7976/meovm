@@ -83,13 +83,26 @@ class VmMixinGeneratorHelper {
     );
     if (supertype is! InterfaceType) return;
 
-    final paramType = supertype.typeArguments.firstOrNull?.element;
-    if (paramType is! InterfaceElement) return;
+    final paramType = _interfaceElementOf(supertype.typeArguments.firstOrNull);
+    if (paramType == null) return;
 
     yield* _getExternalMembersFromExactly(paramType);
     for (final type in paramType.allSupertypes) {
       yield* _getExternalMembersFromExactly(type.element);
     }
+  }
+
+  InterfaceElement? _interfaceElementOf(
+    DartType? type, [
+    Set<TypeParameterElement>? visited,
+  ]) {
+    if (type is InterfaceType) return type.element;
+    if (type is! TypeParameterType) return null;
+
+    visited ??= {};
+    if (!visited.add(type.element)) return null;
+
+    return _interfaceElementOf(type.bound, visited);
   }
 
   Iterable<_ExternalMemberInfo> _getExternalMembersFromExactly(
@@ -401,7 +414,7 @@ class _ExternalMemberInfo {
   bool get isAnonymous => vm == null;
 
   bool isSame(Element? other) {
-    return member == other;
+    return other is FieldElement && member.baseElement == other.baseElement;
   }
 
   @override

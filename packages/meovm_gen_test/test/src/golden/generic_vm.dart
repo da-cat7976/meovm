@@ -7,4 +7,10 @@ mixin _$GenericVm<T extends models.Entity, P extends GenericParam<T>>
   List<ViewModelMember> get members {
     return [...super.members, value];
   }
+
+  @override
+  void setDependencies(ViewModelDependencySetter depend) {
+    super.setDependencies(depend);
+    depend(param.value, value);
+  }
 }
