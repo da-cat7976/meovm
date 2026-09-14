@@ -1,0 +1,125 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref_type != 'tag' }}
+
+jobs:
+  validate:
+    name: Analyze and test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: flutter-actions/setup-flutter@v4
+        with:
+          version: 3.47.2
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Analyze
+        run: dart analyze --fatal-infos
+
+      - name: Run tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          for package in \
+            packages/meovm \
+            packages/meovm_gen_test \
+            packages/meovm_bloc \
+            packages/meovm_riverpod
+          do
+            (cd "$package" && flutter test)
+          done
+
+  publish:
+    name: Publish packages to pub.dev
+    if: github.ref_type == 'tag'
+    needs: validate
+    runs-on: ubuntu-latest
+    environment: pub.dev
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      # setup-dart provisions the short-lived pub.dev OIDC credential.
+      - name: Set up pub.dev authentication
+        uses: dart-lang/setup-dart@v1
+
+      - name: Set up Flutter
+        uses: flutter-actions/setup-flutter@v4
+        with:
+          version: 3.47.2
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Verify tag and package versions
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag_version="${GITHUB_REF_NAME#v}"
+          packages=(
+            packages/meovm_api
+            packages/meovm
+            packages/meovm_gen
+            packages/meovm_bloc
+            packages/meovm_riverpod
+            packages/meovm_lint
+          )
+          for package in "${packages[@]}"; do
+            package_version="$(sed -n 's/^version: *//p' "$package/pubspec.yaml")"
+            if [[ "$package_version" != "$tag_version" ]]; then
+              echo "::error file=$package/pubspec.yaml::Version $package_version does not match tag $GITHUB_REF_NAME"
+              exit 1
+            fi
+          done
+
+      - name: Validate packages for publishing
+        shell: bash
+        run: |
+          set -euo pipefail
+          for package in \
+            packages/meovm_api \
+            packages/meovm \
+            packages/meovm_gen \
+            packages/meovm_bloc \
+            packages/meovm_riverpod \
+            packages/meovm_lint
+          do
+            (cd "$package" && dart pub publish --dry-run)
+          done
+
+      - name: Publish packages
+        shell: bash
+        run: |
+          set -euo pipefail
+          for package in \
+            packages/meovm_api \
+            packages/meovm \
+            packages/meovm_gen \
+            packages/meovm_bloc \
+            packages/meovm_riverpod \
+            packages/meovm_lint
+          do
+            (cd "$package" && dart pub publish --force)
+          done
