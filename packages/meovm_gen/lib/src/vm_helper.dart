@@ -49,7 +49,7 @@ class VmMixinGeneratorHelper {
     final mixin = Mixin(
       (b) => b
         ..name = '_\$${element.name}'
-        ..types.addAll(buildTypeParameters(element))
+        ..types.addAll(buildTypeParameters(element, library))
         ..on = refer(element.supertype!.getDisplayString())
         ..methods.addAll(
           [...definitions, ?memberList, ?setDependencies], // fmt

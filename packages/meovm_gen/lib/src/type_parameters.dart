@@ -1,16 +1,26 @@
+import 'package:analyzer/dart/analysis/results.dart';
+import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:code_builder/code_builder.dart';
 
-Iterable<Reference> buildTypeParameters(ClassElement element) {
-  return element.typeParameters.map((parameter) {
-    final bound = parameter.bound;
+Iterable<Reference> buildTypeParameters(
+  ClassElement element,
+  ResolvedLibraryResult library,
+) {
+  final declaration = library.getFragmentDeclaration(element.firstFragment);
+  final node = declaration?.node;
+  if (node is! ClassDeclaration) return const [];
 
-    return TypeReference(
-      (b) => b
-        ..symbol = parameter.name
-        ..bound = bound == null ? null : refer(bound.getDisplayString()),
-    );
-  });
+  return node.namePart.typeParameters?.typeParameters.map((parameter) {
+        return TypeReference(
+          (b) => b
+            ..symbol = parameter.name.lexeme
+            ..bound = parameter.bound == null
+                ? null
+                : refer(parameter.bound!.toSource()),
+        );
+      }) ??
+      const [];
 }
 
 String typeParameterUsage(ClassElement element) {

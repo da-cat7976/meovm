@@ -1,3 +1,4 @@
+import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
 import 'package:code_builder/code_builder.dart';
@@ -27,6 +28,12 @@ class ParamMixinGeneratorHelper {
     ConstantReader annotation,
     BuildStep buildStep,
   ) async {
+    final libElement = element.library;
+    final library = await libElement.session.getResolvedLibraryByElement(
+      libElement,
+    );
+    if (library is! ResolvedLibraryResult) return '';
+
     final checked = _getChecked(element).toList();
 
     final shouldUpdate = _buildShouldUpdate(element, checked);
@@ -34,7 +41,7 @@ class ParamMixinGeneratorHelper {
     final mixin = Mixin(
       (b) => b
         ..name = '_\$${element.name}'
-        ..types.addAll(buildTypeParameters(element))
+        ..types.addAll(buildTypeParameters(element, library))
         ..on = refer('ViewModelParameter')
         ..methods.addAll([..._buildDefinitions(checked), shouldUpdate])
         ..base = true,
