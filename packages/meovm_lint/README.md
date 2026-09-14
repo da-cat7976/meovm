@@ -31,15 +31,14 @@ A lightweight MVVM framework for Flutter that provides:
 1. Run:
 
     ```bash
-    flutter pub add meovm meovm_api flutter_hooks dev:custom_lint dev:meovm_lint dev:build_runner dev:meovm_gen
+    flutter pub add meovm meovm_api flutter_hooks dev:meovm_lint dev:build_runner dev:meovm_gen
     ```
 
 2. Add to analysis_options.yaml (if not added yet):
 
     ```yaml
-    analyzer:
-      plugins:
-        - custom_lint
+    plugins:
+      meovm_lint: ^1.1.3
     ```
 
 3. Integrate with your state manager:
@@ -74,9 +73,8 @@ Just add selected packages via `flutter pub add`. And don't forget to add:
 navigation members (and `hooks_riverpod` if you use riverpod).
 2. Following to `analysis_options.yaml`:
     ```yaml
-    analyzer:
-      plugins:
-        - custom_lint
+    plugins:
+      meovm_lint: ^1.1.3
     ```
 
 ## Core concepts

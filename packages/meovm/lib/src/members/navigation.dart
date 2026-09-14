@@ -1,4 +1,3 @@
-
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -47,17 +46,11 @@ import 'package:meovm_api/meovm_api.dart';
 /// }
 /// ```
 class NavigationMember<T> extends ValueMember<T> {
-  NavigationMember({
-    super.initial,
-    super.resolver,
-    super.debugName,
-  })  : _autoReset = false,
-        _autoResetValue = null;
+  NavigationMember({super.initial, super.resolver, super.debugName})
+    : _autoReset = false,
+      _autoResetValue = null;
 
-  factory NavigationMember.autoReset({
-    required T initial,
-    String? debugName,
-  }) {
+  factory NavigationMember.autoReset({required T initial, String? debugName}) {
     return NavigationMember._autoResetInternal(
       initial: initial,
       debugName: debugName,
@@ -69,8 +62,8 @@ class NavigationMember<T> extends ValueMember<T> {
     required T initial,
     super.debugName,
     bool autoReset = false,
-  })  : _autoReset = autoReset,
-        _autoResetValue = initial;
+  }) : _autoReset = autoReset,
+       _autoResetValue = initial;
 
   final bool _autoReset;
 
@@ -151,10 +144,9 @@ class NavigationMember<T> extends ValueMember<T> {
 ///  }
 /// }
 /// ```
-class ModalFlowMember<Result> extends ViewModelMember with ChangeNotifier, NotifierChangeTracker {
-  ModalFlowMember({
-    super.debugName,
-  });
+class ModalFlowMember<Result> extends ViewModelMember
+    with ChangeNotifier, NotifierChangeTracker {
+  ModalFlowMember({super.debugName});
 
   /// The result of the last modal window call.
   ///
@@ -240,11 +232,10 @@ class ModalFlowMember<Result> extends ViewModelMember with ChangeNotifier, Notif
 
   @override
   DiagnosticsNode toDiagnosticsNode() => StringProperty(
-        debugName,
-        isModalRequested
-            ? '<requested>'
-            : _result?.toString() ?? '<not requested>',
-        quoted: false,
-        description: 'Member that controls modal flow',
-      );
+    debugName,
+    isModalRequested ? '<requested>' : _result?.toString() ?? '<not requested>',
+    quoted: false,
+    description: 'Member that controls modal flow',
+  );
 }
+// ignore_for_file: prefer_initializing_formals

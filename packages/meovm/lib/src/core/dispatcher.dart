@@ -203,3 +203,4 @@ class ViewModelDispatcherState<
   @override
   List<ViewModelOwnerFeature> get features => widget._features;
 }
+// ignore_for_file: prefer_initializing_formals

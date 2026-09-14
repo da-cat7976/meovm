@@ -5,8 +5,10 @@ import 'package:meovm/src/core/member_factory.dart';
 import 'package:meovm_api/meovm_api.dart';
 
 /// Function for defining dependencies between ViewModel members.
-typedef ViewModelDependencySetter =
-    void Function(ViewModelMember source, ViewModelMember target);
+typedef ViewModelDependencySetter = void Function(
+  ViewModelMember source,
+  ViewModelMember target,
+);
 
 @visibleForTesting
 typedef DisposeListener = void Function(ViewModelMember disposed);
@@ -365,3 +367,4 @@ abstract class ViewModelMember implements ViewModelMemberBase {
   DiagnosticsNode toDiagnosticsNode() =>
       StringProperty(debugName, '<unknown>', quoted: false);
 }
+// ignore_for_file: prefer_initializing_formals

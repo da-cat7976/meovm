@@ -21,82 +21,86 @@ class RiverpodMembersTests {
   }
 
   void _riverpodDataMember() {
-    testWidgets('RiverpodDataMember reflects provider and updates dependents',
-            (tester) async {
-          final vm = _RiverpodVm();
+    testWidgets('RiverpodDataMember reflects provider and updates dependents', (
+      tester,
+    ) async {
+      final vm = _RiverpodVm();
 
-          await tester.pumpWidget(
-            ProviderScope(
-              child: Directionality(
-                textDirection: TextDirection.ltr,
-                child: RiverpodVmDispatcher<_RiverpodVm, _Param>(
-                  factory: () => vm,
-                  param: const _Param(),
-                  child: Builder(
-                    builder: (context) {
-                      final vm = context.useVM<_RiverpodVm>();
-                      final data = vm.data;
-                      final dataPlusOne = vm.dataPlusOne;
+      await tester.pumpWidget(
+        ProviderScope(
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: RiverpodVmDispatcher<_RiverpodVm, _Param>(
+              factory: () => vm,
+              param: const _Param(),
+              child: Builder(
+                builder: (context) {
+                  final vm = context.useVM<_RiverpodVm>();
+                  final data = vm.data;
+                  final dataPlusOne = vm.dataPlusOne;
 
-                      return Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // shows provider value
-                          data.build(
-                            builder: (_, _) => Text(
-                              data.data.toString(),
-                              key: const ValueKey('data'),
-                            ),
-                          ),
-                          // shows dependent value
-                          dataPlusOne.build(
-                            builder: (_, _) => Text(
-                              dataPlusOne.data.toString(),
-                              key: const ValueKey('data_plus_one'),
-                            ),
-                          ),
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // shows provider value
+                      data.build(
+                        builder: (_, _) => Text(
+                          data.data.toString(),
+                          key: const ValueKey('data'),
+                        ),
+                      ),
+                      // shows dependent value
+                      dataPlusOne.build(
+                        builder: (_, _) => Text(
+                          dataPlusOne.data.toString(),
+                          key: const ValueKey('data_plus_one'),
+                        ),
+                      ),
 
-                          // button that updates the underlying provider via ref
-                          Consumer(
-                            builder: (context, ref, _) {
-                              return ElevatedButton(
-                                key: const ValueKey('inc_provider'),
-                                onPressed: () {
-                                  final notifier =
-                                  ref.read(_counterProvider.notifier);
-                                  notifier.state++;
-                                },
-                                child: const Text('inc provider'),
+                      // button that updates the underlying provider via ref
+                      Consumer(
+                        builder: (context, ref, _) {
+                          return ElevatedButton(
+                            key: const ValueKey('inc_provider'),
+                            onPressed: () {
+                              final notifier = ref.read(
+                                _counterProvider.notifier,
                               );
+                              notifier.state++;
                             },
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                ),
+                            child: const Text('inc provider'),
+                          );
+                        },
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
-          );
+          ),
+        ),
+      );
 
-          // initial values: counter=1, plus one = 2
-          expect(find.byKey(const ValueKey('data')), findsOneWidget);
-          expect(find.text('1'), findsOneWidget);
-          expect(find.byKey(const ValueKey('data_plus_one')), findsOneWidget);
-          expect(find.text('2'), findsOneWidget);
+      // initial values: counter=1, plus one = 2
+      expect(find.byKey(const ValueKey('data')), findsOneWidget);
+      expect(find.text('1'), findsOneWidget);
+      expect(find.byKey(const ValueKey('data_plus_one')), findsOneWidget);
+      expect(find.text('2'), findsOneWidget);
 
-          // increment the provider
-          await tester.tap(find.byKey(const ValueKey('inc_provider')));
-          await tester.pump();
+      // increment the provider
+      await tester.tap(find.byKey(const ValueKey('inc_provider')));
+      await tester.pump();
 
-          // updated values: counter=2, plus one = 3
-          expect(find.text('2'), findsOneWidget);
-          expect(find.text('3'), findsOneWidget);
-        });
+      // updated values: counter=2, plus one = 3
+      expect(find.text('2'), findsOneWidget);
+      expect(find.text('3'), findsOneWidget);
+    });
   }
 
   void _riverpodActionGroup() {
-    testWidgets('RiverpodActionGroup exposes notifier and state', (tester) async {
+    testWidgets('RiverpodActionGroup exposes notifier and state', (
+      tester,
+    ) async {
       final vm = _RiverpodVm();
 
       await tester.pumpWidget(
@@ -123,10 +127,8 @@ class RiverpodMembersTests {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       group.build(
-                        builder: (_, _) => Text(
-                          groupText(),
-                          key: const ValueKey('group'),
-                        ),
+                        builder: (_, _) =>
+                            Text(groupText(), key: const ValueKey('group')),
                       ),
                       ElevatedButton(
                         key: const ValueKey('inc_group'),
@@ -181,8 +183,9 @@ class _CounterGroup extends AsyncNotifier<int> {
   }
 }
 
-final _counterGroupProvider =
-AsyncNotifierProvider<_CounterGroup, int>(_CounterGroup.new);
+final _counterGroupProvider = AsyncNotifierProvider<_CounterGroup, int>(
+  _CounterGroup.new,
+);
 
 // Minimal param to satisfy RiverpodVmDispatcher generic constraints
 final class _Param extends ViewModelParameter {
@@ -196,7 +199,7 @@ final class _Param extends ViewModelParameter {
 class _RiverpodVm extends ViewModel<_Param> {
   // Provides data from a Riverpod provider
   late final data = RiverpodDataMember<int>(
-        (ref, _) => ref.watch(_counterProvider),
+    (ref, _) => ref.watch(_counterProvider),
     debugName: 'data',
   );
 
@@ -208,9 +211,9 @@ class _RiverpodVm extends ViewModel<_Param> {
 
   // Action group: exposes notifier and state
   late final group = RiverpodActionGroup<_CounterGroup, AsyncValue<int>>(
-        (ref, _) => (
-    group: ref.watch(_counterGroupProvider.notifier),
-    state: ref.watch(_counterGroupProvider),
+    (ref, _) => (
+      group: ref.watch(_counterGroupProvider.notifier),
+      state: ref.watch(_counterGroupProvider),
     ),
     debugName: 'group',
   );
@@ -228,3 +231,4 @@ class _RiverpodVm extends ViewModel<_Param> {
     group.notifier.increment();
   }
 }
+// ignore_for_file: meovm_lint/meovm_abstract_resolver

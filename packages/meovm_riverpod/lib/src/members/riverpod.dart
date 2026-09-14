@@ -6,7 +6,8 @@ import 'package:meta/meta.dart';
 
 typedef RiverpodDataMemberResolver<T> = T Function(WidgetRef ref, T? data);
 
-typedef RiverpodActionGroupResolver<Group, State> = ({Group group, State state}) Function(WidgetRef ref, State? data);
+typedef RiverpodActionGroupResolver<Group, State> =
+    ({Group group, State state}) Function(WidgetRef ref, State? data);
 
 abstract class RiverpodMember<T> extends UpdateNotifierMember<T> {
   RiverpodMember({super.debugName, super.frozen});
@@ -216,7 +217,8 @@ class RiverpodActionGroup<Group, State> extends RiverpodMember<State> {
 }
 
 @experimental
-extension SideEffectExtension<Param extends ViewModelParameter?> on ViewModel<Param> {
+extension SideEffectExtension<Param extends ViewModelParameter?>
+    on ViewModel<Param> {
   /// Delays the execution of a side effect.
   ///
   /// Useful for calling notifier methods from resolvers of [RiverpodDataMember]

@@ -1,57 +1,71 @@
+import 'package:analyzer/analysis_rule/analysis_rule.dart';
+import 'package:analyzer/analysis_rule/rule_context.dart';
+import 'package:analyzer/analysis_rule/rule_visitor_registry.dart';
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
-import 'package:analyzer/dart/element/element2.dart';
-import 'package:analyzer/error/error.dart' show ErrorSeverity;
-import 'package:analyzer/error/listener.dart';
-import 'package:custom_lint_builder/custom_lint_builder.dart';
+import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/error/error.dart';
+import 'package:source_gen/source_gen.dart';
 
-class AbstractResolverRule extends DartLintRule {
-  AbstractResolverRule() : super(code: _code);
+class AbstractResolverRule extends AnalysisRule {
+  AbstractResolverRule()
+    : super(
+        name: code.lowerCaseName,
+        description: 'Avoid abstract resolvers in generated view models.',
+      );
+
+  static const code = LintCode(
+    'meovm_abstract_resolver',
+    'Avoid using abstract resolvers. No dependencies will be generated.',
+    severity: DiagnosticSeverity.WARNING,
+  );
+
+  static const _classChecker = TypeChecker.typeNamedLiterally(
+    'MeovmAutoVm',
+    inPackage: 'meovm_api',
+  );
 
   @override
-  void run(
-    CustomLintResolver resolver,
-    ErrorReporter reporter,
-    CustomLintContext context,
+  LintCode get diagnosticCode => code;
+
+  @override
+  void registerNodeProcessors(
+    RuleVisitorRegistry registry,
+    RuleContext context,
   ) {
-    context.registry.addFieldDeclaration((node) {
-      final enclosingClass = node.thisOrAncestorOfType<ClassDeclaration>();
-      final classElement = enclosingClass?.declaredFragment?.element;
-      if (classElement == null || !_classChecker.isAssignableFrom(classElement)) {
-        return;
-      }
-
-      final visitor = _AbstractResolverVisitor();
-      node.visitChildren(visitor);
-
-      if (!visitor.visitedAbstractMethod) return;
-      reporter.atNode(node, _code);
-    });
+    registry.addFieldDeclaration(this, _Visitor(this));
   }
+}
 
-  static const _code = LintCode(
-    name: 'meovm_abstract_resolver',
-    problemMessage:
-        'Avoid to use abstract resolvers.\n'
-        'No dependencies will be generated.',
-    errorSeverity: ErrorSeverity.WARNING,
-  );
+class _Visitor extends SimpleAstVisitor<void> {
+  _Visitor(this.rule);
 
-  static final _classChecker = TypeChecker.fromName(
-    'MeovmAutoVm',
-    packageName: 'meovm_api',
-  );
+  final AbstractResolverRule rule;
+
+  @override
+  void visitFieldDeclaration(FieldDeclaration node) {
+    final enclosingClass = node.thisOrAncestorOfType<ClassDeclaration>();
+    final classElement = enclosingClass?.declaredFragment?.element;
+    if (classElement == null ||
+        !AbstractResolverRule._classChecker.isAssignableFrom(classElement)) {
+      return;
+    }
+
+    final visitor = _AbstractResolverVisitor();
+    node.visitChildren(visitor);
+    if (visitor.visitedAbstractMethod) rule.reportAtNode(node);
+  }
 }
 
 class _AbstractResolverVisitor extends RecursiveAstVisitor<void> {
-  bool _visitedAbstractMethod = false;
-
-  bool get visitedAbstractMethod => _visitedAbstractMethod;
+  bool visitedAbstractMethod = false;
 
   @override
   void visitSimpleIdentifier(SimpleIdentifier node) {
     final element = node.element;
-    if (element is! MethodElement2) return super.visitSimpleIdentifier(node);
-    _visitedAbstractMethod = _visitedAbstractMethod || element.isAbstract;
+    if (element is MethodElement && element.isAbstract) {
+      visitedAbstractMethod = true;
+    }
+    super.visitSimpleIdentifier(node);
   }
 }

@@ -1,16 +1,19 @@
 import 'package:analyzer/dart/ast/ast.dart';
-import 'package:analyzer/dart/element/element2.dart';
-import 'package:analyzer/error/error.dart' show ErrorSeverity;
-import 'package:custom_lint_builder/custom_lint_builder.dart';
+import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/error/error.dart';
 import 'package:meovm_lint/src/rules/common/member.dart';
+import 'package:source_gen/source_gen.dart';
 
 class LifecycleAccessRule extends MemberAccessRule {
-  LifecycleAccessRule() : super(code: _code);
+  LifecycleAccessRule()
+    : super(
+        code: _code,
+        description: 'Restricts access to ViewModel lifecycle methods.',
+      );
 
   @override
-  bool checkElement(Element2? element, AstNode node) {
-    if (element is! Annotatable) return false;
-    if (!_annotationChecker.hasAnnotationOf(element as Annotatable)) {
+  bool checkElement(Element? element, AstNode node) {
+    if (element == null || !_annotationChecker.hasAnnotationOf(element)) {
       return false;
     }
 
@@ -32,29 +35,29 @@ class LifecycleAccessRule extends MemberAccessRule {
     return true;
   }
 
-  static final _annotationChecker = TypeChecker.fromName(
+  static const _annotationChecker = TypeChecker.typeNamedLiterally(
     '_MeovmLifecycle',
-    packageName: 'meovm_api',
+    inPackage: 'meovm_api',
   );
 
-  static final _memberChecker = TypeChecker.fromName(
+  static const _memberChecker = TypeChecker.typeNamedLiterally(
     'MeovmAutoVmMember',
-    packageName: 'meovm_api',
+    inPackage: 'meovm_api',
   );
 
-  static final _vmChecker = TypeChecker.fromName(
+  static const _vmChecker = TypeChecker.typeNamedLiterally(
     'MeovmAutoVm',
-    packageName: 'meovm_api',
+    inPackage: 'meovm_api',
   );
 
-  static final _ownerChecker = TypeChecker.fromName(
+  static const _ownerChecker = TypeChecker.typeNamedLiterally(
     'MeovmAutoVmOwner',
-    packageName: 'meovm_api',
+    inPackage: 'meovm_api',
   );
 
-  static final _featureChecker = TypeChecker.fromName(
+  static const _featureChecker = TypeChecker.typeNamedLiterally(
     'MeovmAutoVmFeature',
-    packageName: 'meovm_api',
+    inPackage: 'meovm_api',
   );
 
   static final _classCheckers = [
@@ -65,10 +68,9 @@ class LifecycleAccessRule extends MemberAccessRule {
   ];
 
   static const _code = LintCode(
-    name: 'meovm_invalid_lifecycle_access',
-    problemMessage:
-        'Do not access ViewModelMember\'s and ViewModel\'s lifecycle methods '
-        'outside of ViewModelMember, ViewModel & ViewModelDispatcher',
-    errorSeverity: ErrorSeverity.WARNING,
+    'meovm_invalid_lifecycle_access',
+    'Do not access ViewModelMember\'s and ViewModel\'s lifecycle methods '
+        'outside ViewModelMember, ViewModel, or ViewModelDispatcher.',
+    severity: DiagnosticSeverity.WARNING,
   );
 }

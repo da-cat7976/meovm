@@ -12,3 +12,4 @@ abstract class TestVm extends ViewModel {
     return 1;
   }
 }
+// ignore_for_file: meovm_lint/meovm_abstract_resolver

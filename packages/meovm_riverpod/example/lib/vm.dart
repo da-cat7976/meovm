@@ -36,3 +36,4 @@ class CounterVm extends ViewModel<CounterParam> with _$CounterVm {
     _counter.notifier.increment();
   }
 }
+// ignore_for_file: meovm_lint/meovm_abstract_resolver

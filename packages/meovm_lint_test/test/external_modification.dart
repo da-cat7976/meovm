@@ -70,3 +70,4 @@ void fun() {
   // expect_lint: meovm_external_modification
   vm.test[1] = 1;
 }
+// ignore_for_file: meovm_lint/meovm_external_modification

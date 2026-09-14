@@ -135,10 +135,7 @@ typedef _VMParamPair<
 > = ({VM vm, Param param});
 
 class ViewModelScope extends InheritedWidget {
-  const ViewModelScope._({
-    required super.child,
-    required Map<Type, _VMParamPair> vms,
-  }) : _vms = vms;
+  const ViewModelScope._({required super.child, required this._vms});
 
   @factory
   @internal

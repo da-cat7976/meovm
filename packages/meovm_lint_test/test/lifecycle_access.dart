@@ -23,3 +23,4 @@ void fun() {
   vm.lifecycleMethod();
   vm.nonLifecycleMethod();
 }
+// ignore_for_file: meovm_lint/meovm_invalid_lifecycle_access
