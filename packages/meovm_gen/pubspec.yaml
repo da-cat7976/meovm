@@ -1,6 +1,6 @@
 name: meovm_gen
 description: "A code generator for meovm — lightweight MVVM framework for Flutter. Built-in dependencies between members, bunch of built-in members for common use cases, and minimum boilerplate approach."
-version: 1.2.0
+version: 1.2.1
 repository: https://github.com/da-cat7976/meovm
 issue_tracker: https://github.com/da-cat7976/meovm/issues
 
@@ -20,7 +20,7 @@ dependencies:
   source_span: ^1.10.2
   path: ^1.9.1
   loggy: ^2.0.3
-  meovm_api: ^1.2.0
+  meovm_api: ^1.2.1
   source_gen: ^4.2.4
   collection: ^1.19.1
 

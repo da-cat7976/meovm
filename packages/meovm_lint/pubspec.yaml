@@ -1,6 +1,6 @@
 name: meovm_lint
 description: "A linter for meovm — lightweight MVVM framework for Flutter. Built-in dependencies between members, bunch of built-in members for common use cases, and minimum boilerplate approach."
-version: 1.2.0
+version: 1.2.1
 repository: https://github.com/da-cat7976/meovm
 issue_tracker: https://github.com/da-cat7976/meovm/issues
 
@@ -10,7 +10,7 @@ environment:
   sdk: ^3.13.0
 
 dependencies:
-  analysis_server_plugin: 0.3.18
+  analysis_server_plugin: ^0.3.18
   analyzer: ^13.3.0
   source_gen: ^4.2.4
 

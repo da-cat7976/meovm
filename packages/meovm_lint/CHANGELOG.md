@@ -1,3 +1,7 @@
+## 1.2.1 - 2026-09-15
+### Fixed
+- Relaxed the `analysis_server_plugin` constraint so `meovm_lint` passes pub.dev validation
+
 ## 1.2.0 - 2026-09-14
 ### Added
 - Code generation for generic ViewModels and parameters, including bounded and nullable type

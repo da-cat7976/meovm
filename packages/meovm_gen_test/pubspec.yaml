@@ -1,6 +1,6 @@
 name: meovm_gen_test
 description: "Test package for meovm codegen"
-version: 1.2.0
+version: 1.2.1
 publish_to: none
 
 environment:
@@ -11,9 +11,9 @@ resolution: workspace
 dependencies:
   flutter:
     sdk: flutter
-  meovm: ^1.2.0
-  meovm_gen: ^1.2.0
-  meovm_api: ^1.2.0
+  meovm: ^1.2.1
+  meovm_gen: ^1.2.1
+  meovm_api: ^1.2.1
 
 dev_dependencies:
   flutter_test:
