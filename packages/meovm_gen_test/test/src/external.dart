@@ -13,6 +13,15 @@ class SomeVm extends ViewModel {
   late final other = ValueMember<int>();
 }
 
+class GetterMemberVm extends ViewModel {
+  late final _value = ValueMember<int>();
+
+  ValueMember<int> get value => _value;
+
+  @override
+  List<ViewModelMember> get members => [...super.members, _value];
+}
+
 @ShouldGenerateFile('golden/external_param.dart', partOfCurrent: true)
 @Meovm()
 final class ExternalDepsParam extends ViewModelParameter
@@ -38,9 +47,10 @@ class ExternalDepsVm extends ViewModel<ExternalDepsParam>
 }
 
 final class GetterExternalParam extends ViewModelParameter {
-  const GetterExternalParam(this.vm);
+  const GetterExternalParam(this.vm, this.getterVm);
 
   final SomeVm vm;
+  final GetterMemberVm getterVm;
 
   ValueMember<int> get direct => vm.value;
 
@@ -48,7 +58,7 @@ final class GetterExternalParam extends ViewModelParameter {
 
   @override
   bool shouldUpdateDependencies(covariant GetterExternalParam? oldParam) =>
-      oldParam?.vm != vm;
+      oldParam?.vm != vm || oldParam?.getterVm != getterVm;
 }
 
 @ShouldGenerateFile('golden/getter_external_vm.dart', partOfCurrent: true)
@@ -61,6 +71,11 @@ class GetterExternalVm extends ViewModel<GetterExternalParam>
   @override
   late final fromNested = ValueMember<int>(
     resolver: (_) => param.nested.value.data,
+  );
+
+  @override
+  late final fromGetterMember = ValueMember<int>(
+    resolver: (_) => param.getterVm.value.data,
   );
 }
 

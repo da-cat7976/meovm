@@ -134,17 +134,29 @@ class VmMixinGeneratorHelper {
     InterfaceType interface,
     TypeSystem typeSystem,
   ) sync* {
-    yield* _getMemberFields(interface, typeSystem);
+    yield* _getMemberFields(
+      interface,
+      typeSystem,
+      includeGetterProperties: true,
+    );
     for (final supertype in interface.allSupertypes) {
-      yield* _getMemberFields(supertype, typeSystem);
+      yield* _getMemberFields(
+        supertype,
+        typeSystem,
+        includeGetterProperties: true,
+      );
     }
   }
 
   Iterable<FieldElement> _getMemberFields(
     InterfaceType interface,
-    TypeSystem typeSystem,
-  ) sync* {
-    for (final field in _fieldsOf(interface)) {
+    TypeSystem typeSystem, {
+    bool includeGetterProperties = false,
+  }) sync* {
+    for (final field in _fieldsOf(
+      interface,
+      includeGetterProperties: includeGetterProperties,
+    )) {
       if (_isNonNullableAssignable(_memberChecker, field.type, typeSystem)) {
         yield field;
       }
