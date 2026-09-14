@@ -6,6 +6,7 @@ import 'models.dart' as models;
 
 part 'golden/generic_param.dart';
 part 'golden/generic_vm.dart';
+part 'golden/nullable_generic_vm.dart';
 
 class ChildVm extends ViewModel {
   late final childValue = ValueMember<int>();
@@ -48,5 +49,27 @@ class GenericVm<
   @override
   late final nested = ValueMember<int>(
     resolver: (_) => source.data + param.child.childValue.data,
+  );
+}
+
+final class NullableGenericParam<V extends ChildVm?>
+    extends ViewModelParameter {
+  const NullableGenericParam(this.child);
+
+  final V child;
+
+  @override
+  bool shouldUpdateDependencies(covariant NullableGenericParam<V>? oldParam) =>
+      oldParam?.child != child;
+}
+
+@ShouldGenerateFile('golden/nullable_generic_vm.dart', partOfCurrent: true)
+@Meovm()
+class NullableGenericVm<V extends ChildVm?, P extends NullableGenericParam<V>>
+    extends ViewModel<P>
+    with _$NullableGenericVm<V, P> {
+  @override
+  late final nested = ValueMember<int?>(
+    resolver: (_) => param.child?.childValue.data,
   );
 }

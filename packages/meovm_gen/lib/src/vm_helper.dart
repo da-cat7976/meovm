@@ -2,6 +2,7 @@ import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/dart/ast/ast.dart' hide Block, Expression;
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:build/build.dart';
 import 'package:code_builder/code_builder.dart';
@@ -106,6 +107,7 @@ class VmMixinGeneratorHelper {
 
       final vmClass = resolveInterfaceElement(type);
       if (vmClass != null &&
+          !_isPotentiallyNullable(type) &&
           _vmChecker.isAssignableFromType(vmClass.thisType)) {
         final members = [
           ..._getMembers(vmClass),
@@ -117,6 +119,19 @@ class VmMixinGeneratorHelper {
         }
       }
     }
+  }
+
+  bool _isPotentiallyNullable(
+    DartType type, [
+    Set<TypeParameterElement>? visited,
+  ]) {
+    if (type.nullabilitySuffix == NullabilitySuffix.question) return true;
+    if (type is! TypeParameterType) return false;
+
+    visited ??= {};
+    if (!visited.add(type.element)) return false;
+
+    return _isPotentiallyNullable(type.bound, visited);
   }
 
   Iterable<_DependencyPair> _getDependencies(
