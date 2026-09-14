@@ -125,80 +125,129 @@ class VmMixinGeneratorHelper {
     final allMembers = [...members, ...inheritedMembers];
 
     for (final member in members) {
-      final declaration = library.getFragmentDeclaration(member.firstFragment);
-      final node = declaration?.node;
-
-      if (node is! VariableDeclaration) return;
-      final initializer = node.initializer;
+      final initializer = _initializerOf(library, member);
       if (initializer == null) return;
 
-      final collector = _MemberDependenciesCollector(
+      final discovered = _collectDependencies(
         library: library,
-        current: member,
+        initializer: initializer,
         members: allMembers,
         externalMembers: externalMembers,
       );
-      initializer.visitChildren(collector);
+      final annotations = _dependAnnotationsOf(member).toList();
 
-      final dependAnnotations = _dependAnnotationsOf(member);
-      final disabled = dependAnnotations.where((a) => a.disabled);
-      final disabledInternal = disabled.where((a) => !a.external).toSet();
-      final disabledExternal = disabled.where((a) => a.external).toSet();
+      yield* _discoveredDependenciesOf(member, discovered, annotations);
+      yield* _annotatedDependenciesOf(
+        member,
+        annotations,
+        allMembers,
+        externalMembers,
+      );
+    }
+  }
 
-      for (final internal in collector.internalDependencies) {
-        final isDisabled = disabledInternal.any(
-          (a) => a.dependOn == Symbol(internal.name!),
-        );
-        if (isDisabled) continue;
+  AstNode? _initializerOf(ResolvedLibraryResult library, FieldElement member) {
+    final declaration = library.getFragmentDeclaration(member.firstFragment);
+    final node = declaration?.node;
+    return node is VariableDeclaration ? node.initializer : null;
+  }
 
-        yield _InternalDependency(source: internal, target: member);
-      }
+  _MemberDependenciesCollector _collectDependencies({
+    required ResolvedLibraryResult library,
+    required AstNode initializer,
+    required List<FieldElement> members,
+    required List<_ExternalMemberInfo> externalMembers,
+  }) {
+    final collector = _MemberDependenciesCollector(
+      library: library,
+      members: members,
+      externalMembers: externalMembers,
+    );
+    initializer.visitChildren(collector);
+    return collector;
+  }
 
-      for (final external in collector.externalDependencies) {
-        final isDisabled = disabledExternal.any(
-          (a) =>
-              a.dependOn == Symbol(external.member.name!) &&
-                  external.isAnonymous
-              ? true
-              : a.from == Symbol(external.vm!.name!),
-        );
-        if (isDisabled) continue;
+  Iterable<_DependencyPair> _discoveredDependenciesOf(
+    FieldElement target,
+    _MemberDependenciesCollector discovered,
+    List<MeovmDepend> annotations,
+  ) sync* {
+    final disabled = annotations.where((annotation) => annotation.disabled);
+    final disabledInternal = disabled.where(
+      (annotation) => !annotation.external,
+    );
+    final disabledExternal = disabled.where(
+      (annotation) => annotation.external,
+    );
 
-        yield _ExternalDependency(source: external, target: member);
-      }
-
-      final enabled = dependAnnotations.where((a) => !a.disabled);
-
-      for (final depend in enabled) {
-        if (depend.external) {
-          final source = externalMembers.firstWhereOrNull(
-            (e) => depend.dependOn == Symbol(e.member.name!) && e.isAnonymous
-                ? true
-                : depend.from == Symbol(e.vm!.name!),
-          );
-          if (source == null) {
-            throw InvalidGenerationSourceError(
-              'Could not find source dependency ${depend.dependOn}',
-              element: member,
-            );
-          }
-
-          yield _ExternalDependency(source: source, target: member);
-        } else {
-          final source = allMembers.firstWhereOrNull(
-            (e) => Symbol(e.name!) == depend.dependOn,
-          );
-          if (source == null) {
-            throw InvalidGenerationSourceError(
-              'Could not find source dependency ${depend.dependOn}',
-              element: member,
-            );
-          }
-
-          yield _InternalDependency(source: source, target: member);
-        }
+    for (final source in discovered.internalDependencies) {
+      final isDisabled = disabledInternal.any(
+        (annotation) => annotation.dependOn == Symbol(source.name!),
+      );
+      if (!isDisabled) {
+        yield _InternalDependency(source: source, target: target);
       }
     }
+
+    for (final source in discovered.externalDependencies) {
+      final isDisabled = disabledExternal.any(
+        (annotation) => _matchesExternal(annotation, source),
+      );
+      if (!isDisabled) {
+        yield _ExternalDependency(source: source, target: target);
+      }
+    }
+  }
+
+  Iterable<_DependencyPair> _annotatedDependenciesOf(
+    FieldElement target,
+    List<MeovmDepend> annotations,
+    List<FieldElement> members,
+    List<_ExternalMemberInfo> externalMembers,
+  ) sync* {
+    for (final annotation in annotations.where((item) => !item.disabled)) {
+      yield annotation.external
+          ? _resolveExternalDependency(annotation, target, externalMembers)
+          : _resolveInternalDependency(annotation, target, members);
+    }
+  }
+
+  _InternalDependency _resolveInternalDependency(
+    MeovmDepend annotation,
+    FieldElement target,
+    List<FieldElement> members,
+  ) {
+    final source = members.firstWhereOrNull(
+      (member) => Symbol(member.name!) == annotation.dependOn,
+    );
+    if (source == null) _throwSourceNotFound(annotation, target);
+    return _InternalDependency(source: source, target: target);
+  }
+
+  _ExternalDependency _resolveExternalDependency(
+    MeovmDepend annotation,
+    FieldElement target,
+    List<_ExternalMemberInfo> externalMembers,
+  ) {
+    final source = externalMembers.firstWhereOrNull(
+      (member) => _matchesExternal(annotation, member),
+    );
+    if (source == null) _throwSourceNotFound(annotation, target);
+    return _ExternalDependency(source: source, target: target);
+  }
+
+  bool _matchesExternal(MeovmDepend annotation, _ExternalMemberInfo member) {
+    if (member.isAnonymous) {
+      return annotation.dependOn == Symbol(member.member.name!);
+    }
+    return annotation.from == Symbol(member.vm!.name!);
+  }
+
+  Never _throwSourceNotFound(MeovmDepend annotation, FieldElement target) {
+    throw InvalidGenerationSourceError(
+      'Could not find source dependency ${annotation.dependOn}',
+      element: target,
+    );
   }
 
   Iterable<MeovmDepend> _dependAnnotationsOf(FieldElement element) sync* {
@@ -363,8 +412,6 @@ class _ExternalMemberInfo {
 class _MemberDependenciesCollector extends RecursiveAstVisitor<void> {
   final ResolvedLibraryResult library;
 
-  final FieldElement current;
-
   final List<FieldElement> members;
 
   final List<_ExternalMemberInfo> externalMembers;
@@ -373,19 +420,22 @@ class _MemberDependenciesCollector extends RecursiveAstVisitor<void> {
 
   final Set<_ExternalMemberInfo> _external = {};
 
+  final Set<ExecutableElement> _visitedExecutables;
+
   _MemberDependenciesCollector({
     required this.library,
-    required this.current,
     required this.members,
     required this.externalMembers,
-  });
+    Set<ExecutableElement>? visitedExecutables,
+  }) : _visitedExecutables = visitedExecutables ?? {};
 
   @override
   void visitSimpleIdentifier(SimpleIdentifier node) {
     final element = node.element;
 
     if (element is MethodElement) {
-      return _checkMethodImplementation(element);
+      _checkExecutableImplementation(element);
+      return;
     }
 
     if (element is! PropertyAccessorElement) {
@@ -394,7 +444,8 @@ class _MemberDependenciesCollector extends RecursiveAstVisitor<void> {
 
     final type = element.returnType;
     if (!_memberChecker.isAssignableFromType(type)) {
-      return super.visitSimpleIdentifier(node);
+      _checkExecutableImplementation(element);
+      return;
     }
 
     final internal = members.firstWhereOrNull((e) => e == element.variable);
@@ -414,24 +465,24 @@ class _MemberDependenciesCollector extends RecursiveAstVisitor<void> {
     super.visitSimpleIdentifier(node);
   }
 
-  void _checkMethodImplementation(MethodElement element) {
+  void _checkExecutableImplementation(ExecutableElement element) {
+    if (!_visitedExecutables.add(element)) return;
+
     final declaration = _getLibrarySafeDeclaration(element);
     final node = declaration?.node;
 
     if (node is! MethodDeclaration) return;
 
-    final body = node.body;
-    if (body is! BlockFunctionBody) return;
-
     final subCollector = _MemberDependenciesCollector(
       library: library,
-      current: current,
       members: members,
       externalMembers: externalMembers,
+      visitedExecutables: _visitedExecutables,
     );
 
-    body.visitChildren(subCollector);
+    node.body.visitChildren(subCollector);
     _internal.addAll(subCollector.internalDependencies);
+    _external.addAll(subCollector.externalDependencies);
   }
 
   FragmentDeclarationResult? _getLibrarySafeDeclaration(Element element) {

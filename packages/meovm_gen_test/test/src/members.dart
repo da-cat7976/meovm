@@ -5,6 +5,7 @@ import 'package:source_gen_test/annotations.dart';
 part 'golden/manual_dependencies.dart';
 part 'golden/members.dart';
 part 'golden/method_invoking.dart';
+part 'golden/getter_invoking.dart';
 
 @ShouldGenerateFile('golden/members.dart', partOfCurrent: true)
 @Meovm()
@@ -31,6 +32,20 @@ class MethodInvokingVm extends ViewModel with _$MethodInvokingVm {
   int _resolver(int? data) {
     return valueA.data + valueB.data;
   }
+}
+
+@ShouldGenerateFile('golden/getter_invoking.dart', partOfCurrent: true)
+@Meovm()
+class GetterInvokingVm extends ViewModel with _$GetterInvokingVm {
+  @override
+  late final valueA = ValueMember<int>();
+
+  bool get isOdd => valueA.data.isOdd;
+
+  String describeValue() => isOdd ? 'Odd' : 'Even';
+
+  @override
+  late final valueB = ValueMember<String>(resolver: (_) => describeValue());
 }
 
 @ShouldGenerateFile('golden/manual_dependencies.dart', partOfCurrent: true)
