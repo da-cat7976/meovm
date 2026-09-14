@@ -47,18 +47,21 @@ jobs:
       - name: Analyze
         run: dart analyze --fatal-infos
 
-      - name: Run tests
+      - name: Run Flutter tests
         shell: bash
         run: |
           set -euo pipefail
           for package in \
             packages/meovm \
-            packages/meovm_gen_test \
             packages/meovm_bloc \
             packages/meovm_riverpod
           do
             (cd "$package" && flutter test)
           done
+
+      - name: Run generator tests
+        working-directory: packages/meovm_gen_test
+        run: dart test
 
   publish:
     name: Publish packages to pub.dev
