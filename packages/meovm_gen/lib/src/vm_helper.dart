@@ -2,12 +2,15 @@ import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/dart/ast/ast.dart' hide Block, Expression;
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:analyzer/dart/element/type.dart';
+import 'package:analyzer/dart/element/type_system.dart';
 import 'package:build/build.dart';
-import 'package:code_builder/code_builder.dart';
+import 'package:code_builder/code_builder.dart' hide ParenthesizedExpression;
 import 'package:collection/collection.dart';
 import 'package:dart_style/dart_style.dart';
 import 'package:meovm_api/meovm_api.dart';
+import 'package:meovm_gen/src/type_parameters.dart';
 import 'package:source_gen/source_gen.dart';
 
 class VmMixinGeneratorHelper {
@@ -30,9 +33,10 @@ class VmMixinGeneratorHelper {
     );
     if (library is! ResolvedLibraryResult) return '';
 
-    final members = _getMembers(element).toList();
-    final inheritedMembers = _getInheritedMembers(element).toList();
-    final externalMembers = _getExternalMembers(element).toList();
+    final typeSystem = element.library.typeSystem;
+    final members = _getMembers(element, typeSystem).toList();
+    final inheritedMembers = _getInheritedMembers(element, typeSystem).toList();
+    final externalMembers = _getExternalMembers(element, typeSystem).toList();
 
     final dependencies = _getDependencies(
       library,
@@ -48,6 +52,7 @@ class VmMixinGeneratorHelper {
     final mixin = Mixin(
       (b) => b
         ..name = '_\$${element.name}'
+        ..types.addAll(buildTypeParameters(element, library))
         ..on = refer(element.supertype!.getDisplayString())
         ..methods.addAll(
           [...definitions, ?memberList, ?setDependencies], // fmt
@@ -59,55 +64,64 @@ class VmMixinGeneratorHelper {
     return _formatter.format('${mixin.accept(emitter)}');
   }
 
-  Iterable<FieldElement> _getMembers(InterfaceElement element) sync* {
+  Iterable<FieldElement> _getMembers(
+    InterfaceElement element,
+    TypeSystem typeSystem,
+  ) sync* {
     for (final field in element.fields) {
-      if (_memberChecker.isAssignableFromType(field.type)) yield field;
+      if (field.isOriginGetterSetter) continue;
+      if (_isNonNullableAssignable(_memberChecker, field.type, typeSystem)) {
+        yield field;
+      }
     }
   }
 
-  Iterable<FieldElement> _getInheritedMembers(InterfaceElement element) sync* {
+  Iterable<FieldElement> _getInheritedMembers(
+    InterfaceElement element,
+    TypeSystem typeSystem,
+  ) sync* {
     for (final type in element.allSupertypes) {
-      for (final field in type.element.fields) {
-        if (_memberChecker.isAssignableFromType(field.type)) yield field;
-      }
+      yield* _getMemberFields(type, typeSystem);
     }
   }
 
   Iterable<_ExternalMemberInfo> _getExternalMembers(
     InterfaceElement element,
+    TypeSystem typeSystem,
   ) sync* {
     final supertype = element.allSupertypes.firstWhereOrNull(
       (e) => _vmChecker.isExactlyType(e),
     );
     if (supertype is! InterfaceType) return;
 
-    final paramType = supertype.typeArguments.firstOrNull?.element;
-    if (paramType is! InterfaceElement) return;
+    final paramType = resolveInterfaceType(
+      supertype.typeArguments.firstOrNull,
+      typeSystem,
+    );
+    if (paramType == null || _isNullable(paramType)) return;
 
-    yield* _getExternalMembersFromExactly(paramType);
+    yield* _getExternalMembersFromExactly(paramType, typeSystem);
     for (final type in paramType.allSupertypes) {
-      yield* _getExternalMembersFromExactly(type.element);
+      yield* _getExternalMembersFromExactly(type, typeSystem);
     }
   }
 
   Iterable<_ExternalMemberInfo> _getExternalMembersFromExactly(
-    InterfaceElement element,
+    InterfaceType interface,
+    TypeSystem typeSystem,
   ) sync* {
-    for (final field in element.fields) {
+    for (final field in _fieldsOf(interface, includeGetterProperties: true)) {
       final type = field.type;
 
-      if (_memberChecker.isAssignableFromType(type)) {
+      if (_isNonNullableAssignable(_memberChecker, type, typeSystem)) {
         yield _ExternalMemberInfo(field);
       }
 
-      if (_vmChecker.isAssignableFromType(type)) {
-        final vmClass = type.element;
-        if (vmClass is! InterfaceElement) continue;
-
-        final members = [
-          ..._getMembers(vmClass),
-          ..._getInheritedMembers(vmClass),
-        ];
+      final vmType = resolveInterfaceType(type, typeSystem);
+      if (vmType != null &&
+          !_isNullable(vmType) &&
+          _vmChecker.isAssignableFromType(vmType)) {
+        final members = _getMemberFieldsWithSupertypes(vmType, typeSystem);
 
         for (final member in members) {
           yield _ExternalMemberInfo(member, vm: field);
@@ -115,6 +129,65 @@ class VmMixinGeneratorHelper {
       }
     }
   }
+
+  Iterable<FieldElement> _getMemberFieldsWithSupertypes(
+    InterfaceType interface,
+    TypeSystem typeSystem,
+  ) sync* {
+    yield* _getMemberFields(
+      interface,
+      typeSystem,
+      includeGetterProperties: true,
+    );
+    for (final supertype in interface.allSupertypes) {
+      yield* _getMemberFields(
+        supertype,
+        typeSystem,
+        includeGetterProperties: true,
+      );
+    }
+  }
+
+  Iterable<FieldElement> _getMemberFields(
+    InterfaceType interface,
+    TypeSystem typeSystem, {
+    bool includeGetterProperties = false,
+  }) sync* {
+    for (final field in _fieldsOf(
+      interface,
+      includeGetterProperties: includeGetterProperties,
+    )) {
+      if (_isNonNullableAssignable(_memberChecker, field.type, typeSystem)) {
+        yield field;
+      }
+    }
+  }
+
+  Iterable<FieldElement> _fieldsOf(
+    InterfaceType interface, {
+    bool includeGetterProperties = false,
+  }) sync* {
+    for (final getter in interface.getters) {
+      final variable = getter.variable;
+      if (variable is FieldElement &&
+          (includeGetterProperties || !variable.isOriginGetterSetter)) {
+        yield variable;
+      }
+    }
+  }
+
+  bool _isNonNullableAssignable(
+    TypeChecker checker,
+    DartType type,
+    TypeSystem typeSystem,
+  ) {
+    final resolved = resolveInterfaceType(type, typeSystem);
+    if (resolved == null || _isNullable(resolved)) return false;
+    return checker.isAssignableFromType(resolved);
+  }
+
+  bool _isNullable(DartType type) =>
+      type.nullabilitySuffix == NullabilitySuffix.question;
 
   Iterable<_DependencyPair> _getDependencies(
     ResolvedLibraryResult library,
@@ -126,7 +199,7 @@ class VmMixinGeneratorHelper {
 
     for (final member in members) {
       final initializer = _initializerOf(library, member);
-      if (initializer == null) return;
+      if (initializer == null) continue;
 
       final discovered = _collectDependencies(
         library: library,
@@ -240,7 +313,8 @@ class VmMixinGeneratorHelper {
     if (member.isAnonymous) {
       return annotation.dependOn == Symbol(member.member.name!);
     }
-    return annotation.from == Symbol(member.vm!.name!);
+    return annotation.from == Symbol(member.vm!.name!) &&
+        annotation.dependOn == Symbol(member.member.name!);
   }
 
   Never _throwSourceNotFound(MeovmDepend annotation, FieldElement target) {
@@ -398,8 +472,12 @@ class _ExternalMemberInfo {
 
   bool get isAnonymous => vm == null;
 
-  bool isSame(Element? other) {
-    return member == other;
+  bool isSame(Element? other, FieldElement? receiver) {
+    if (other is! FieldElement || member.baseElement != other.baseElement) {
+      return false;
+    }
+    if (isAnonymous) return true;
+    return receiver != null && vm!.baseElement == receiver.baseElement;
   }
 
   @override
@@ -443,26 +521,60 @@ class _MemberDependenciesCollector extends RecursiveAstVisitor<void> {
     }
 
     final type = element.returnType;
-    if (!_memberChecker.isAssignableFromType(type)) {
+    final resolvedType = resolveInterfaceType(type, library.element.typeSystem);
+    if (resolvedType == null ||
+        resolvedType.nullabilitySuffix == NullabilitySuffix.question ||
+        !_memberChecker.isAssignableFromType(resolvedType)) {
       _checkExecutableImplementation(element);
       return;
     }
 
-    final internal = members.firstWhereOrNull((e) => e == element.variable);
+    final internal = members.firstWhereOrNull(
+      (e) => e.baseElement == element.variable.baseElement,
+    );
     if (internal != null) {
       _internal.add(internal);
       return;
     }
 
+    final receiver = _receiverFieldOf(node);
     final external = externalMembers.firstWhereOrNull(
-      (e) => e.isSame(element.variable),
+      (e) => e.isSame(element.variable, receiver),
     );
     if (external != null) {
       _external.add(external);
       return;
     }
 
-    super.visitSimpleIdentifier(node);
+    _checkExecutableImplementation(element);
+  }
+
+  FieldElement? _receiverFieldOf(SimpleIdentifier node) {
+    final parent = node.parent;
+    final rawReceiver = switch (parent) {
+      PrefixedIdentifier() when identical(parent.identifier, node) =>
+        parent.prefix,
+      PropertyAccess() when identical(parent.propertyName, node) =>
+        parent.realTarget,
+      _ => null,
+    };
+    if (rawReceiver == null) return null;
+
+    AstNode receiver = rawReceiver;
+    while (receiver is ParenthesizedExpression) {
+      receiver = receiver.expression;
+    }
+
+    final element = switch (receiver) {
+      SimpleIdentifier() => receiver.element,
+      PrefixedIdentifier() => receiver.identifier.element,
+      PropertyAccess() => receiver.propertyName.element,
+      _ => null,
+    };
+    if (element is! PropertyAccessorElement) return null;
+
+    final variable = element.variable;
+    return variable is FieldElement ? variable : null;
   }
 
   void _checkExecutableImplementation(ExecutableElement element) {

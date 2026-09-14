@@ -1,8 +1,12 @@
+import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/type.dart';
+import 'package:analyzer/dart/element/type_system.dart';
 import 'package:build/build.dart';
 import 'package:code_builder/code_builder.dart';
 import 'package:dart_style/dart_style.dart';
 import 'package:meovm_api/meovm_api.dart';
+import 'package:meovm_gen/src/type_parameters.dart';
 import 'package:source_gen/source_gen.dart';
 
 class ParamMixinGeneratorHelper {
@@ -26,6 +30,12 @@ class ParamMixinGeneratorHelper {
     ConstantReader annotation,
     BuildStep buildStep,
   ) async {
+    final libElement = element.library;
+    final library = await libElement.session.getResolvedLibraryByElement(
+      libElement,
+    );
+    if (library is! ResolvedLibraryResult) return '';
+
     final checked = _getChecked(element).toList();
 
     final shouldUpdate = _buildShouldUpdate(element, checked);
@@ -33,6 +43,7 @@ class ParamMixinGeneratorHelper {
     final mixin = Mixin(
       (b) => b
         ..name = '_\$${element.name}'
+        ..types.addAll(buildTypeParameters(element, library))
         ..on = refer('ViewModelParameter')
         ..methods.addAll([..._buildDefinitions(checked), shouldUpdate])
         ..base = true,
@@ -42,15 +53,29 @@ class ParamMixinGeneratorHelper {
   }
 
   Iterable<FieldElement> _getChecked(ClassElement element) sync* {
+    final typeSystem = element.library.typeSystem;
     for (final field in element.fields) {
-      if (_vmChecker.isAssignableFromType(field.type)) {
-        yield field;
-      }
-
-      if (_memberChecker.isAssignableFromType(field.type)) {
+      if (_isAssignableFromTypeOrBound(_vmChecker, field.type, typeSystem) ||
+          _isAssignableFromTypeOrBound(
+            _memberChecker,
+            field.type,
+            typeSystem,
+          )) {
         yield field;
       }
     }
+  }
+
+  bool _isAssignableFromTypeOrBound(
+    TypeChecker checker,
+    DartType type,
+    TypeSystem typeSystem,
+  ) {
+    if (checker.isAssignableFromType(type)) return true;
+
+    final interface = resolveInterfaceType(type, typeSystem);
+    return interface != null &&
+        checker.isAssignableFromType(typeSystem.promoteToNonNull(interface));
   }
 
   Iterable<Method> _buildDefinitions(Iterable<FieldElement> members) sync* {
@@ -95,7 +120,7 @@ class ParamMixinGeneratorHelper {
           Parameter(
             (b) => b
               ..name = 'oldParam'
-              ..type = refer('${element.name}?')
+              ..type = refer('${element.name}${typeParameterUsage(element)}?')
               ..covariant = true,
           ),
         )
