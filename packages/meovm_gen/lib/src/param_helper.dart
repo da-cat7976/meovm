@@ -3,6 +3,7 @@ import 'package:build/build.dart';
 import 'package:code_builder/code_builder.dart';
 import 'package:dart_style/dart_style.dart';
 import 'package:meovm_api/meovm_api.dart';
+import 'package:meovm_gen/src/type_parameters.dart';
 import 'package:source_gen/source_gen.dart';
 
 class ParamMixinGeneratorHelper {
@@ -33,6 +34,7 @@ class ParamMixinGeneratorHelper {
     final mixin = Mixin(
       (b) => b
         ..name = '_\$${element.name}'
+        ..types.addAll(buildTypeParameters(element))
         ..on = refer('ViewModelParameter')
         ..methods.addAll([..._buildDefinitions(checked), shouldUpdate])
         ..base = true,
@@ -95,7 +97,7 @@ class ParamMixinGeneratorHelper {
           Parameter(
             (b) => b
               ..name = 'oldParam'
-              ..type = refer('${element.name}?')
+              ..type = refer('${element.name}${typeParameterUsage(element)}?')
               ..covariant = true,
           ),
         )

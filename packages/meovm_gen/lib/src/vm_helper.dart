@@ -8,6 +8,7 @@ import 'package:code_builder/code_builder.dart';
 import 'package:collection/collection.dart';
 import 'package:dart_style/dart_style.dart';
 import 'package:meovm_api/meovm_api.dart';
+import 'package:meovm_gen/src/type_parameters.dart';
 import 'package:source_gen/source_gen.dart';
 
 class VmMixinGeneratorHelper {
@@ -48,6 +49,7 @@ class VmMixinGeneratorHelper {
     final mixin = Mixin(
       (b) => b
         ..name = '_\$${element.name}'
+        ..types.addAll(buildTypeParameters(element))
         ..on = refer(element.supertype!.getDisplayString())
         ..methods.addAll(
           [...definitions, ?memberList, ?setDependencies], // fmt
