@@ -1,3 +1,7 @@
+## 1.2.2 - 2026-09-15
+### Fixed
+- Release metadata for the corrected pub.dev publishing workflow
+
 ## 1.2.1 - 2026-09-15
 ### Fixed
 - Relaxed the `analysis_server_plugin` constraint so `meovm_lint` passes pub.dev validation

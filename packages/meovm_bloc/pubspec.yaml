@@ -1,6 +1,6 @@
 name: meovm_bloc
 description: "A flutter_bloc integration package for meovm — lightweight MVVM framework for Flutter. Built-in dependencies between members, bunch of built-in members for common use cases, and minimum boilerplate approach."
-version: 1.2.1
+version: 1.2.2
 repository: https://github.com/da-cat7976/meovm
 issue_tracker: https://github.com/da-cat7976/meovm/issues
 
@@ -13,7 +13,7 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_bloc: ^9.1.1
-  meovm: ^1.2.1
+  meovm: ^1.2.2
   meta: ^1.19.0
 
 dev_dependencies:

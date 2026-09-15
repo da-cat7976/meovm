@@ -35,7 +35,7 @@ A lightweight MVVM framework for Flutter that provides:
 
     ```yaml
     plugins:
-      meovm_lint: ^1.2.1
+      meovm_lint: ^1.2.2
     ```
 
 3. Integrate with your state manager:
@@ -71,7 +71,7 @@ navigation members (and `hooks_riverpod` if you use riverpod).
 2. Following to `analysis_options.yaml`:
     ```yaml
     plugins:
-      meovm_lint: ^1.2.1
+      meovm_lint: ^1.2.2
     ```
 
 ## Core concepts
