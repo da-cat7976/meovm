@@ -61,11 +61,32 @@ class _AbstractResolverVisitor extends RecursiveAstVisitor<void> {
   bool visitedAbstractMethod = false;
 
   @override
-  void visitSimpleIdentifier(SimpleIdentifier node) {
-    final element = node.element;
-    if (element is MethodElement && element.isAbstract) {
-      visitedAbstractMethod = true;
+  void visitArgumentList(ArgumentList node) {
+    for (final argument in node.arguments) {
+      if (argument.correspondingParameter?.name != 'resolver') continue;
+
+      final element = _resolverElement(argument.argumentExpression);
+      if (element is MethodElement && element.isAbstract) {
+        visitedAbstractMethod = true;
+      }
     }
-    super.visitSimpleIdentifier(node);
+
+    super.visitArgumentList(node);
+  }
+
+  @override
+  void visitFunctionExpression(FunctionExpression node) {}
+
+  Element? _resolverElement(Expression expression) {
+    return switch (expression) {
+      SimpleIdentifier(:final element) => element,
+      PrefixedIdentifier(:final element) => element,
+      PropertyAccess(:final propertyName) => propertyName.element,
+      ParenthesizedExpression(:final expression) => _resolverElement(
+        expression,
+      ),
+      FunctionReference(:final function) => _resolverElement(function),
+      _ => null,
+    };
   }
 }

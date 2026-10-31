@@ -63,6 +63,10 @@ jobs:
         working-directory: packages/meovm_gen_test
         run: dart test
 
+      - name: Run linter diagnostic tests
+        working-directory: packages/meovm_lint
+        run: dart test
+
   publish:
     name: Publish packages to pub.dev
     if: github.ref_type == 'tag'

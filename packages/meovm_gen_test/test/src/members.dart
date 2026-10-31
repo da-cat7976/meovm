@@ -6,6 +6,7 @@ part 'golden/manual_dependencies.dart';
 part 'golden/members.dart';
 part 'golden/method_invoking.dart';
 part 'golden/getter_invoking.dart';
+part 'golden/concrete_resolvers.dart';
 
 @ShouldGenerateFile('golden/members.dart', partOfCurrent: true)
 @Meovm()
@@ -46,6 +47,24 @@ class GetterInvokingVm extends ViewModel with _$GetterInvokingVm {
 
   @override
   late final valueB = ValueMember<String>(resolver: (_) => describeValue());
+}
+
+@ShouldGenerateFile('golden/concrete_resolvers.dart', partOfCurrent: true)
+@Meovm()
+class ConcreteResolversVm extends ViewModel with _$ConcreteResolversVm {
+  @override
+  late final input = member.editableText();
+
+  @override
+  late final cleaned = member.value(
+    resolver: (_) => input.controller.text.trim(),
+  );
+
+  @override
+  late final uri = member.value<Uri>(initial: Uri.parse('https://example.com'));
+
+  @override
+  late final formatted = member.value(resolver: (_) => uri.data.toString());
 }
 
 @ShouldGenerateFile('golden/manual_dependencies.dart', partOfCurrent: true)
