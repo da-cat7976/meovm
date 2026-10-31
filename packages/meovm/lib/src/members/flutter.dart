@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:meovm/src/core/api.dart';
@@ -34,8 +36,10 @@ class EditableTextMember extends BuildableViewModelMember with ChangeTracker {
   /// changes inside the ViewModel.
   final MemberUpdater<TextEditingController>? onUpdate;
 
-  /// Duration of Debounce events for [TextEditingController].
-  /// By default [Duration.zero]
+  /// Delay before notifying member listeners after the latest controller change.
+  ///
+  /// The controller and its direct listeners always update immediately.
+  /// Defaults to [Duration.zero], which notifies member listeners immediately.
   final Duration debounce;
 
   /// The [TextEditingController] accessible for use within the ViewModel
@@ -55,13 +59,36 @@ class EditableTextMember extends BuildableViewModelMember with ChangeTracker {
 
   TextEditingController? _controller;
 
+  final _EditableTextNotifier _notifier = _EditableTextNotifier();
+
+  Timer? _debounceTimer;
+
   @override
   void init(ViewModelOwner owner) {
     super.init(owner);
 
     final initial = initText?.call() ?? '';
     _controller = TextEditingController(text: initial);
-    _controller!.addListener(notifyChanged);
+    _controller!.addListener(_onControllerChanged);
+  }
+
+  void _onControllerChanged() {
+    _debounceTimer?.cancel();
+
+    if (debounce <= Duration.zero) {
+      _notifyControllerChanged();
+      return;
+    }
+
+    _debounceTimer = Timer(debounce, () {
+      _debounceTimer = null;
+      _notifyControllerChanged();
+    });
+  }
+
+  void _notifyControllerChanged() {
+    notifyChanged();
+    _notifier.notifyChanged();
   }
 
   @override
@@ -71,17 +98,22 @@ class EditableTextMember extends BuildableViewModelMember with ChangeTracker {
 
   @override
   void addListener(VoidCallback listener) {
-    controller.addListener(listener);
+    _notifier.addListener(listener);
   }
 
   @override
   void removeListener(VoidCallback listener) {
-    controller.removeListener(listener);
+    _notifier.removeListener(listener);
   }
 
   @override
   void dispose() {
+    _debounceTimer?.cancel();
+    _debounceTimer = null;
+
     super.dispose();
+
+    _notifier.dispose();
     _controller?.dispose();
     _controller = null;
   }
@@ -92,6 +124,12 @@ class EditableTextMember extends BuildableViewModelMember with ChangeTracker {
     _controller?.text ?? '<non ready>',
     tooltip: 'Editable text. Selection: ${_controller?.selection}',
   );
+}
+
+class _EditableTextNotifier extends ChangeNotifier {
+  void notifyChanged() {
+    notifyListeners();
+  }
 }
 
 /// A member that allows the ViewModel to work with an [AnimationController].

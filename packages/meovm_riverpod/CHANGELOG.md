@@ -1,3 +1,8 @@
+## 1.2.3 - 2026-10-31
+### Fixed
+- Honor `EditableTextMember.debounce` for member listeners, dependent members, and builders;
+  keep controller updates immediate and cancel pending notifications on disposal (#45)
+
 ## 1.2.2 - 2026-09-15
 ### Fixed
 - Release metadata for the corrected pub.dev publishing workflow
