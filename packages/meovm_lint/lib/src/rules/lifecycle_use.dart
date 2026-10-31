@@ -13,7 +13,7 @@ class LifecycleAccessRule extends MemberAccessRule {
 
   @override
   bool checkElement(Element? element, AstNode node) {
-    if (element == null || !_annotationChecker.hasAnnotationOf(element)) {
+    if (element == null || !_isLifecycleElement(element)) {
       return false;
     }
 
@@ -33,6 +33,33 @@ class LifecycleAccessRule extends MemberAccessRule {
     }
 
     return true;
+  }
+
+  bool _isLifecycleElement(Element element) {
+    if (_annotationChecker.hasAnnotationOf(element)) return true;
+
+    // An override does not inherit the metadata of its original declaration.
+    // Follow the complete hierarchy so intermediate overrides cannot remove
+    // lifecycle protection.
+    if (element is! MethodElement || element.isStatic) return false;
+
+    final enclosingElement = element.enclosingElement;
+    final name = element.name;
+
+    if (enclosingElement is! InterfaceElement || name == null) return false;
+
+    for (final supertype in enclosingElement.allSupertypes) {
+      final method = supertype.element.getMethod(name);
+
+      if (method == null || method.isStatic) continue;
+      if (method.isPrivate && method.library != element.library) continue;
+
+      if (_annotationChecker.hasAnnotationOf(method)) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   static const _annotationChecker = TypeChecker.typeNamedLiterally(

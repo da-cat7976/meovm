@@ -1,3 +1,10 @@
+## 1.2.4 - 2026-10-31
+### Fixed
+- Avoid false abstract-resolver diagnostics for concrete closures calling SDK or interface
+  methods, while retaining diagnostics for abstract resolver tear-offs (#47)
+- Diagnose external compound assignments and increment/decrement writes exactly once (#48)
+- Preserve lifecycle access restrictions across method overrides and inheritance (#49)
+
 ## 1.2.3 - 2026-10-31
 ### Fixed
 - Honor `EditableTextMember.debounce` for member listeners, dependent members, and builders;
